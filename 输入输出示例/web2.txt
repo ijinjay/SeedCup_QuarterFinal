@@ -1,0 +1,68 @@
+body{
+    offsetLeft: 0;
+    offsetTop: 0;
+    display: block;
+    position: static;
+    width: 1006px;
+    height: 0;
+    padding: 0 0 0 0;
+    border: 1px 1px 1px 1px;
+    margin: 8px 8px 8px 8px;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    color: #000;
+    line-height: 1.2;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: normal;
+    text-align: left;
+    line-break: normal;
+}
+
+body>div#div2[0]{
+    offsetLeft: 0;
+    offsetTop: 0;
+    display: block;
+    position: absolute;
+    width: 90px;
+    height: 21px;
+    padding: 0 0 0 0;
+    border: 1px 1px 1px 1px;
+    margin: 0 0 0 0;
+    left: 0;
+    right: 932px;
+    top: 0;
+    bottom: 745px;
+    color: #000;
+    line-height: 1.2;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: normal;
+    text-align: left;
+    line-break: normal;
+}
+
+body>div#div2[0]>div.box[0]{
+    offsetLeft: 0;
+    offsetTop: 0;
+    display: block;
+    position: static;
+    width: 88px;
+    height: 19px;
+    padding: 0 0 0 0;
+    border: 1px 1px 1px 1px;
+    margin: 0 0 0 0;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    color: #000;
+    line-height: 1.2;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: normal;
+    text-align: left;
+    line-break: normal;
+}

@@ -1,0 +1,21 @@
+#div1{
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    margin: auto auto auto auto;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.box1, .box2{
+    position: relative;
+    width: 200px;
+    height: 100px;
+    padding: 10px 10px 10px 10px;
+}
+
+#div2{
+    margin: 10px 0 0 0;
+}

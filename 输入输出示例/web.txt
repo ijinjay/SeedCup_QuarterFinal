@@ -1,0 +1,91 @@
+body{
+    offsetLeft: 0;
+    offsetTop: 0;
+    display: block;
+    position: static;
+    width: 1006px;
+    height: 104px;
+    padding: 0 0 0 0;
+    border: 1px 1px 1px 1px;
+    margin: 8px 8px 8px 8px;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    color: #000;
+    line-height: 1.2;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: normal;
+    text-align: left;
+    line-break: normal;
+}
+
+body>div#div1.box1[0]{
+    offsetLeft: 0;
+    offsetTop: 0;
+    display: block;
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    padding: 0 0 0 0;
+    border: 1px 1px 1px 1px;
+    margin: 333px 462px 333px 462px;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    color: #000;
+    line-height: 1.2;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: normal;
+    text-align: left;
+    line-break: normal;
+}
+
+body>div#div2[0]{
+    offsetLeft: 9px;
+    offsetTop: 9px;
+    display: block;
+    position: static;
+    width: 1006px;
+    height: 102px;
+    padding: 0 0 0 0;
+    border: 1px 1px 1px 1px;
+    margin: 10px 0 0 0;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    color: #000;
+    line-height: 1.2;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: normal;
+    text-align: left;
+    line-break: normal;
+}
+
+body>div#div2[0]>div.box2[0]{
+    offsetLeft: 10px;
+    offsetTop: 10px;
+    display: block;
+    position: relative;
+    width: 200px;
+    height: 100px;
+    padding: 0 0 0 0;
+    border: 1px 1px 1px 1px;
+    margin: 0 806px 0 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    color: #000;
+    line-height: 1.2;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: normal;
+    text-align: left;
+    line-break: normal;
+}
