@@ -247,6 +247,17 @@ static pDOMNode str2tag(const char *str) {
     printf("parse tag %s end.\n", tagname);
     return newNode;
 }
+static int errorStack[100];
+static int errorTop = 0;
+static void pushError(int error) {
+    errorStack[errorTop ++] = error;
+}
+static int popError(void) {
+    return errorStack[-- errorTop];
+}
+static int topError(void) {
+    return errorStack[errorTop - 1];
+}
 DOMTree *generateDOMTree(const char *HTML) {
     // 树节点，节点类型为document
     DOMTree *tree = initANewDOMNode();
@@ -288,6 +299,17 @@ DOMTree *generateDOMTree(const char *HTML) {
                     parrent = topNode();
                     if (tagname2tag(str) == parrent->tag) {
                         popNode();
+                        for (int j = errorTop - 1; j >= 0; ++j) {
+                            if (topError() == topNode()->tag) {
+                                popError();
+                                popNode();
+                            }
+                            else 
+                                break;
+                        }
+                    }
+                    else { // 标签关闭错误处理
+                        pushError(tagname2tag(str));
                     }
                 }
                 else
