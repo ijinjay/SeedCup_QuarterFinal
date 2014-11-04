@@ -1,9 +1,5 @@
 #include "IO.h"
-int main() {
-    readHtmlFiles();
-    system("pause");
-    return 0;
-}
+
 int readHtmlFiles() {
     system(GETDIRSCMD);
     FILE *dirFp = fopen(DIRSFILE,"r+");

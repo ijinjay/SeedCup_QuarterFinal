@@ -7,8 +7,8 @@
 #ifndef _SEEDCUP_H
 #define _SEEDCUP_H 
 
-#include "fileHandle.h"
-
+#include "IO.h"
+#include "html2DOM.h"
 // 测试文本的数目
 #ifndef TESTNUM
 #define TESTNUM 33

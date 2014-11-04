@@ -8,7 +8,7 @@ rm = rm -rf
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-SeedCup: fileHandle.o SeedCup.o
+SeedCup: IO.o html2DOM.o SeedCup.o
 	$(CC) $(CFLAGS) $^ -o SeedCup.exe
 
 clean:
