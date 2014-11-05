@@ -1,3 +1,8 @@
 *.pdf
 /Src/*.o
 /Src/SeedCup.exe
+/Src/*.png
+/Src/bin/*
+/Src/obj/*
+/Src/SeedCup.layout
+/Src/SeedCup.depend

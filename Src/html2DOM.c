@@ -134,6 +134,8 @@ static void preparse(char **pHTML) {
             preHTML[j ++] = (*pHTML)[i];
         }
     }
+    // 关闭字符串
+    preHTML[j] = '\0';
     free((*pHTML));
     (*pHTML) = preHTML;
 }
@@ -261,7 +263,6 @@ static pDOMNode str2tag(const char *str) {
     for (int i = 0; i < id->num; ++i) {
         strcpy(newNode->ID, id->results[i]);
     }
-    printf("parse tag %s end.\n", tagname);
     return newNode;
 }
 static int errorStack[100];
@@ -318,12 +319,15 @@ DOMTree *generateDOMTree(const char *HTML) {
                     // 取出栈顶元素，比较后相同便出栈，该标签结束
                     parrent = topNode();
                     if (tagname2tag(str) == parrent->tag) {
+                        printf("parse tag %s end.\n", getTagName(parrent->tag));
                         popNode();
                         for (int j = errorTop - 1; j >= 0; j--) {
                             // 当前错误处理元素与节点的类型一致
                             if (errorStack[j] == topNode()->tag) {
+                                printf("parse tag %s end.\n", getTagName(topNode()->tag));
                                 popNode();
                                 // 修正errorStack
+                                printf("%s\n", getTagName(errorStack[errorTop - 1]));
                                 if (j != errorTop - 1)
                                     changeAB(&(errorStack[j]), &(errorStack[errorTop - 1]));
                                 popError();
@@ -363,7 +367,8 @@ DOMTree *generateDOMTree(const char *HTML) {
                 }
         }
     }
-
-    printf("errorTop is :%d\n", errorTop);
+    for (int i = 0; i < errorTop; ++i) {
+        printf("%s haven't been matched!\n", getTagName(errorStack[i]));
+    }
     return tree;
 }

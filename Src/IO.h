@@ -8,8 +8,7 @@
 #define _IO_H 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <dirent.h>
+#include <direct.h>
 #include <string.h>
 
 #define GETDIRSCMD "DIR /AD /D /B >>Dirs.lis"

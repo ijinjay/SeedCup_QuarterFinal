@@ -5,10 +5,11 @@
  */
 
 #ifndef _SEEDCUP_H
-#define _SEEDCUP_H 
+#define _SEEDCUP_H
 
 #include "IO.h"
 #include "html2DOM.h"
+#include <cairo/cairo.h>
 // 测试文本的数目
 #ifndef TESTNUM
 #define TESTNUM 33
