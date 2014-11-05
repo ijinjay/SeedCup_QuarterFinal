@@ -1,11 +1,11 @@
 #ifndef _HTML2DOM_H
-#define _HTML2DOM_H 
+#define _HTML2DOM_H
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <regex.h>
 #include <ctype.h>
+#include <regex.h>
 
 enum TAG {
     NO_TAG,
