@@ -65,9 +65,26 @@ void printDOMTree(DOMTree *pHead) {
     }
     printDOMNode(pHead);
 }
+static char *getTagName(int tag) {
+    switch(tag) {
+        case HEAD_TAG:  return "head";
+        case BODY_TAG:  return "body";
+        case SPAN_TAG:  return "span";
+        case DIV_TAG:   return "div";
+        case P_TAG:     return "p";
+        case STRONG_TAG:return "strong";
+        case H_TAG:     return "h";
+        case EM_TAG:    return "em";
+        case LINK_TAG:  return "link";
+        case TEXT_TAG:  return "text";
+        case DOCUMENT_TAG: return "document";
+        default: break;
+    }
+    return "unknown";
+}
 // 打印节点style内容
 void printDOMNode(pDOMNode pNode) {
-    printf("%d{\n", pNode->tag);
+    printf("%s{\n", getTagName(pNode->tag));
     printf("\toffsetLeft: %s;\n", pNode->style.offsetLeft);
     printf("\toffsetTop: %s;\n", pNode->style.offsetTop);
     printf("\tdisplay: %s;\n", pNode->style.display);
@@ -255,8 +272,11 @@ static void pushError(int error) {
 static int popError(void) {
     return errorStack[-- errorTop];
 }
-static int topError(void) {
-    return errorStack[errorTop - 1];
+static void changeAB(int *a, int *b) {
+    int temp;
+    temp = (*a);
+    (*a) = (*b);
+    (*b) = (*a);
 }
 DOMTree *generateDOMTree(const char *HTML) {
     // 树节点，节点类型为document
@@ -295,17 +315,20 @@ DOMTree *generateDOMTree(const char *HTML) {
                         str[strIndex ++] = HTML[i];
                     }
                     str[strIndex] = '\0';
-                    // 取出栈顶元素，比较后相同变出栈，该标签结束
+                    // 取出栈顶元素，比较后相同便出栈，该标签结束
                     parrent = topNode();
                     if (tagname2tag(str) == parrent->tag) {
                         popNode();
-                        for (int j = errorTop - 1; j >= 0; ++j) {
-                            if (topError() == topNode()->tag) {
-                                popError();
+                        for (int j = errorTop - 1; j >= 0; j--) {
+                            // 当前错误处理元素与节点的类型一致
+                            if (errorStack[j] == topNode()->tag) {
                                 popNode();
+                                // 修正errorStack
+                                if (j != errorTop - 1)
+                                    changeAB(&(errorStack[j]), &(errorStack[errorTop - 1]));
+                                popError();
+                                j ++;
                             }
-                            else 
-                                break;
                         }
                     }
                     else { // 标签关闭错误处理
@@ -331,7 +354,7 @@ DOMTree *generateDOMTree(const char *HTML) {
                     if (i != len)
                         i --;
                     str[strIndex] = '\0';
-                    printf("text is %s\n", str);
+                    // printf("text is %s\n", str);
                     newNode = initANewDOMNode();
                     newNode->tag = TEXT_TAG;
                     parrent = topNode();
@@ -341,5 +364,6 @@ DOMTree *generateDOMTree(const char *HTML) {
         }
     }
 
+    printf("errorTop is :%d\n", errorTop);
     return tree;
 }
