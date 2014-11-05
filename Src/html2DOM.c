@@ -276,7 +276,7 @@ static void changeAB(int *a, int *b) {
     int temp;
     temp = (*a);
     (*a) = (*b);
-    (*b) = (*a);
+    (*b) = temp;
 }
 DOMTree *generateDOMTree(const char *HTML) {
     // 树节点，节点类型为document
