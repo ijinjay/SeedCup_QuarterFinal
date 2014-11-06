@@ -206,6 +206,11 @@ static pDOMNode popNode(void) {
 static pDOMNode topNode() {
     return stack[stackTop - 1];
 }
+static void initStack(void) {
+    while(stackTop > 0) {
+        popNode();
+    }
+}
 // 根据标签名得到标签的枚举值
 static int tagname2tag(char *tag) {
     if (!strcmp(tag, "body"))
@@ -324,6 +329,11 @@ static void pushError(int error) {
 static int popError(void) {
     return errorStack[-- errorTop];
 }
+static void initErrorStack(void) {
+    while(errorTop > 0) {
+        popError();
+    }
+}
 // 更改AB的值
 static void changeAB(int *a, int *b) {
     int temp;
@@ -333,13 +343,13 @@ static void changeAB(int *a, int *b) {
 }
 // 产生DOMTree
 DOMTree *generateDOMTree(const char *HTML) {
+    // important! 初始化static参数，每次调用时都必须初始化
+    initStack();
+    initErrorStack();
     // 树节点，节点类型为document
     DOMTree *tree = initANewDOMNode();
     tree->tag = DOCUMENT_TAG;
     pushNode(tree);
-    // important! 初始化static参数，每次调用时都必须初始化
-    // errorTop = 0;
-    // stackTop = 0;
     // 解析开始
     int len = strlen(HTML);
     char str[1024];
@@ -375,15 +385,12 @@ DOMTree *generateDOMTree(const char *HTML) {
                     // 取出栈顶元素，比较后相同便出栈，该标签结束
                     parrent = topNode();
                     if (tagname2tag(str) == parrent->tag) {
-                        printf("parse tag %s end.\n", getTagName(parrent->tag));
                         popNode();
                         for (int j = errorTop - 1; j >= 0; j--) {
                             // 当前错误处理元素与节点的类型一致
                             if (errorStack[j] == topNode()->tag) {
-                                printf("parse tag %s end.\n", getTagName(topNode()->tag));
                                 popNode();
                                 // 修正errorStack
-                                printf("%s\n", getTagName(errorStack[errorTop - 1]));
                                 if (j != errorTop - 1)
                                     changeAB(&(errorStack[j]), &(errorStack[errorTop - 1]));
                                 popError();
@@ -416,13 +423,12 @@ DOMTree *generateDOMTree(const char *HTML) {
                     str[strIndex] = '\0';
                     newNode = initANewDOMNode();
                     newNode->tag = TEXT_TAG;
-                    printf("here\n");
                     newNode->text = (char *)malloc(1024 * sizeof(char));
                     strcpy(newNode->text, str);
                     parrent = topNode();
                     addNodeToParent(&parrent, &newNode);
-                    break;
                 }
+                break;
         }
     }
     // 打印出没有配对成功的标签名
