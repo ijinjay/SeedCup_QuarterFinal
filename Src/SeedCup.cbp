@@ -13,7 +13,14 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-std=c99 -I./include" />
 				</Compiler>
+				<Linker>
+					<Add library="lib\cairo.lib" />
+					<Add library="lib\libcairo.dll.a" />
+					<Add library="lib\libregex.dll.a" />
+					<Add library="lib\regex.lib" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/SeedCup" prefix_auto="1" extension_auto="1" />
@@ -22,9 +29,14 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-std=c99 -I./include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="lib\cairo.lib" />
+					<Add library="lib\libcairo.dll.a" />
+					<Add library="lib\libregex.dll.a" />
+					<Add library="lib\regex.lib" />
 				</Linker>
 			</Target>
 		</Build>
@@ -39,6 +51,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="SeedCup.h" />
+		<Unit filename="draw.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="draw.h" />
 		<Unit filename="html2DOM.c">
 			<Option compilerVar="CC" />
 		</Unit>

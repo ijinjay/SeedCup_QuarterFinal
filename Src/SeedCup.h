@@ -9,7 +9,7 @@
 
 #include "IO.h"
 #include "html2DOM.h"
-#include <cairo/cairo.h>
+#include "draw.h"
 // 测试文本的数目
 #ifndef TESTNUM
 #define TESTNUM 33

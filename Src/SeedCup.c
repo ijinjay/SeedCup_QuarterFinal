@@ -20,25 +20,24 @@ int main(int argc, char const *argv[]) {
     freeDOMTree(tree);
     free(data);
 
-    cairo_surface_t *surface;
-    cairo_t *cr;
+    CairoHandle *pCaiHandle = initDrawContext();
 
-    surface =
-        cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 320, 48);
-    cr = cairo_create (surface);
+    Pos a, b;
+    a.x = 10; a.y = 10;
+    b.x = 1000; b.y = 700;
 
-    cairo_set_source_rgb (cr, 0.627, 0, 0);
-    cairo_select_font_face (cr, "Adobe Heiti Std",
+    drawBorder(pCaiHandle, a, b);
+    cairo_set_source_rgb (pCaiHandle->cr, 0.627, 0, 0);
+    cairo_select_font_face (pCaiHandle->cr, "Microsoft YaHei Mono",
                             CAIRO_FONT_SLANT_NORMAL,
                             CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, 24.0);
+    cairo_set_font_size (pCaiHandle->cr, 24.0);
 
-    cairo_move_to (cr, 10.0, 34.0);
-    cairo_show_text (cr, "To Beautiful You! 靳杰");
+    cairo_move_to (pCaiHandle->cr, 10.0, 34.0);
+    cairo_show_text (pCaiHandle->cr, "To Beautiful You! 靳杰");
 
-    cairo_surface_write_to_png (surface, "image.png");
+    cairo_surface_write_to_png (pCaiHandle->surface, "image.png");
 
-    cairo_destroy (cr);
-    cairo_surface_destroy (surface);
+    freeDraw(pCaiHandle);
 	return 0;
 }

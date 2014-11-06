@@ -8,7 +8,7 @@
 #include <regex.h>
 
 enum TAG {
-    NO_TAG,
+    NO_TAG = 0,
     HEAD_TAG,
     BODY_TAG,
     SPAN_TAG,
@@ -63,6 +63,7 @@ typedef struct DOMNode {
     char            ID[20];
     char            classes[20][20];
     int             classNum;
+    char *          text; // 如果是文本，需要申请内存
 }DOMTree, *pDOMNode;
 
 typedef struct NodeStack {

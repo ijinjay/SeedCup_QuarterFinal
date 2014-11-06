@@ -44,6 +44,7 @@ static pDOMNode initANewDOMNode(void) {
     }
     newNode->classNum = 0;
     newNode->fatherNode = NULL;
+    newNode->text = NULL;
     return newNode;
 }
 // 将一个节点添加为另一个节点的儿子节点
@@ -56,6 +57,9 @@ void freeDOMTree(DOMTree *pHead) {
     for (int i = 0; i < pHead->sonNum; ++i) {
         freeDOMTree(pHead->sonNodes[i]);
     }
+    // 纯文本需要额外释放文本占用的内存
+    if (pHead->tag == TEXT_TAG)
+        free(pHead->text);
     free(pHead);
 }
 // 打印DOMTree
@@ -116,7 +120,6 @@ void printDOMNode(pDOMNode pNode) {
     printf("\tline-break: %s;\n", pNode->style.line_break);
     printf("}\n");
 } 
-
 // pHTMLl中的多余空格删去保留一个空格
 static void preparse(char **pHTML) {
     int len = strlen(*pHTML);
@@ -139,7 +142,7 @@ static void preparse(char **pHTML) {
     free((*pHTML));
     (*pHTML) = preHTML;
 }
-
+// 多次正则匹配，将多个匹配结果存入pMultiResult
 static pMultiResult regexMul(const char *pattern, const char *str, int left, int right) {
     pMultiResult r = (pMultiResult)malloc(sizeof(MultiResult));
     r->num = 0;
@@ -158,7 +161,7 @@ static pMultiResult regexMul(const char *pattern, const char *str, int left, int
     }
     return r;
 }
-
+// 解析head标签中的link标签，返回css文件的路径
 CSSURL *parseCSSURL(char **pHTML) {
     preparse(pHTML);
     pCSSURL cssurl = (pCSSURL)malloc(sizeof(CSSURL));
@@ -191,7 +194,7 @@ CSSURL *parseCSSURL(char **pHTML) {
 
     return cssurl;
 }
-
+// 处理父子节点用的节点堆栈
 static pDOMNode stack[100];
 static int stackTop = 0;
 static void pushNode(pDOMNode node) {
@@ -203,7 +206,7 @@ static pDOMNode popNode(void) {
 static pDOMNode topNode() {
     return stack[stackTop - 1];
 }
-
+// 根据标签名得到标签的枚举值
 static int tagname2tag(char *tag) {
     if (!strcmp(tag, "body"))
         return BODY_TAG;
@@ -223,12 +226,54 @@ static int tagname2tag(char *tag) {
         return LINK_TAG;
     return NO_TAG;
 }
+// 更改元素默认属性
+static void modifyElementStyle(pDOMNode *ppNode) {
+    switch((*ppNode)->tag) {
+        case HEAD_TAG:
+        case LINK_TAG:
+            strcpy(((*ppNode)->style).display, "none");break;
+        case STRONG_TAG:
+            strcpy(((*ppNode)->style).font_weight, "bold");
+        case SPAN_TAG:
+            strcpy(((*ppNode)->style).display, "inline");break;
+        case EM_TAG:
+            strcpy(((*ppNode)->style).font_weight, "italic");
+            strcpy(((*ppNode)->style).display, "inline");break;
+        case BODY_TAG: 
+            strcpy(((*ppNode)->style).margin[0], "8px");
+            strcpy(((*ppNode)->style).margin[1], "8px");
+            strcpy(((*ppNode)->style).margin[2], "8px");
+            strcpy(((*ppNode)->style).margin[3], "8px");
+            strcpy(((*ppNode)->style).font_size, "16px");
+            strcpy(((*ppNode)->style).line_height, "1.2");
+        case DIV_TAG:
+            strcpy(((*ppNode)->style).display, "block");break;
+        case P_TAG:
+            strcpy(((*ppNode)->style).margin[0], "1em");
+            strcpy(((*ppNode)->style).margin[1], "0");
+            strcpy(((*ppNode)->style).margin[2], "1em");
+            strcpy(((*ppNode)->style).margin[3], "0");
+            strcpy(((*ppNode)->style).display, "block");break;
+        case H_TAG:
+            strcpy(((*ppNode)->style).font_size, "32px");
+            strcpy(((*ppNode)->style).font_weight, "bold");
+            strcpy(((*ppNode)->style).margin[0], "0.67em");
+            strcpy(((*ppNode)->style).margin[1], "0");
+            strcpy(((*ppNode)->style).margin[2], "0.67em");
+            strcpy(((*ppNode)->style).margin[3], "0");
+            strcpy(((*ppNode)->style).display, "block");break;
+        default:
+            break;
+    }
+}
 // 将含有属性的标签内容分解成tag,class,id
 static pDOMNode str2tag(const char *str) {
+    // 初始化一个节点
     pDOMNode newNode = initANewDOMNode();
     int len = strlen(str);
     char tagname[10];
     int tagIndex = 0;
+    // 将tag名提取出来
     for (int i = 0; i < len; ++i) {
         if (str[i] == ' ')
             break;
@@ -237,9 +282,12 @@ static pDOMNode str2tag(const char *str) {
     }
     tagname[tagIndex] = '\0';
     newNode->tag = tagname2tag(tagname);
+    // 根据tag类型更改节点默认属性
+    modifyElementStyle(&newNode);
+
+    // 解析tag的class和id属性
     MultiResult *c  = regexMul("class=\"[^\"]*\"", str, 7, 1);
     MultiResult *id = regexMul("id=\"[^\"]*\"", str, 4,1);
-
     // 将class和id属性写入节点
     for (int i = 0; i < c->num; ++i) {
         int classlen = strlen(c->results[i]);
@@ -263,8 +311,11 @@ static pDOMNode str2tag(const char *str) {
     for (int i = 0; i < id->num; ++i) {
         strcpy(newNode->ID, id->results[i]);
     }
+    free(c);
+    free(id);
     return newNode;
 }
+// 处理html标签位置错位的堆栈
 static int errorStack[100];
 static int errorTop = 0;
 static void pushError(int error) {
@@ -273,17 +324,22 @@ static void pushError(int error) {
 static int popError(void) {
     return errorStack[-- errorTop];
 }
+// 更改AB的值
 static void changeAB(int *a, int *b) {
     int temp;
     temp = (*a);
     (*a) = (*b);
     (*b) = temp;
 }
+// 产生DOMTree
 DOMTree *generateDOMTree(const char *HTML) {
     // 树节点，节点类型为document
     DOMTree *tree = initANewDOMNode();
     tree->tag = DOCUMENT_TAG;
     pushNode(tree);
+    // important! 初始化static参数，每次调用时都必须初始化
+    // errorTop = 0;
+    // stackTop = 0;
     // 解析开始
     int len = strlen(HTML);
     char str[1024];
@@ -358,15 +414,18 @@ DOMTree *generateDOMTree(const char *HTML) {
                     if (i != len)
                         i --;
                     str[strIndex] = '\0';
-                    // printf("text is %s\n", str);
                     newNode = initANewDOMNode();
                     newNode->tag = TEXT_TAG;
+                    printf("here\n");
+                    newNode->text = (char *)malloc(1024 * sizeof(char));
+                    strcpy(newNode->text, str);
                     parrent = topNode();
                     addNodeToParent(&parrent, &newNode);
                     break;
                 }
         }
     }
+    // 打印出没有配对成功的标签名
     for (int i = 0; i < errorTop; ++i) {
         printf("%s haven't been matched!\n", getTagName(errorStack[i]));
     }
