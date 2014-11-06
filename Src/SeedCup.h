@@ -8,8 +8,7 @@
 #define _SEEDCUP_H
 
 #include "IO.h"
-#include "html2DOM.h"
-#include "draw.h"
+#include "htmlcss2RenderTree.h"
 // 测试文本的数目
 #ifndef TESTNUM
 #define TESTNUM 33

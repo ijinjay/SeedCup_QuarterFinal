@@ -51,6 +51,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="SeedCup.h" />
+		<Unit filename="cssHandle.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cssHandle.h" />
 		<Unit filename="draw.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -59,6 +63,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="html2DOM.h" />
+		<Unit filename="htmlcss2RenderTree.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="htmlcss2RenderTree.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

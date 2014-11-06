@@ -16,11 +16,14 @@
 //#define GETCSSSCMD "DIR /B *.css >> css.lis"
 #define DIRSFILE   "Dirs.lis"
 #define MAXDATA 8096
-//#define HTMLFILE   "html.lis"
-//#define CSSSFILE   "css.lis"
-// 
-int readHtmlFiles();
-int readCssFile(char* data, const char* fileName);
+typedef struct directory {
+    char dir[100];
+    struct directory* next;
+}directory;
+extern directory* getDirs();
+extern void freeDir(directory *dirlist);
+extern int readHtml(char* buffer, const char* dir);
+extern int readCss(char* buffer, const char* dir, const char* fileName);
 int writeFile(char* data, const char* fileName);
 
 #endif // _IO_H

@@ -82,7 +82,7 @@ typedef struct CSSURL {
 
 // 通过html产生CSS的路径,会对html进行更改
 extern CSSURL *parseCSSURL(char **pHTML);
-// 通过解析过head标签后的html产生DOM树
+// 通过解析解析过head标签后的html产生DOM树
 extern DOMTree *generateDOMTree(const char *HTML);
 // 释放DOM树占用的内存
 extern void freeDOMTree(DOMTree *pHead);

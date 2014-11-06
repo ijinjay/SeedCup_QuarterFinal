@@ -179,6 +179,8 @@ CSSURL *parseCSSURL(char **pHTML) {
         strncpy(cssurl->urls[cssurl->urlNum ++], 
                 (*pHTML) + shift + pmatch[0].rm_so+12,
                 pmatch[0].rm_eo-pmatch[0].rm_so-14);
+        (cssurl->urls[cssurl->urlNum-1])[pmatch[0].rm_eo-pmatch[0].rm_so-14] = '\0';
+        printf("css name is %s\n", cssurl->urls[cssurl->urlNum - 1]);
         shift += pmatch[0].rm_eo;
     }
     regcomp(&reg, "<head>.*</head>", REG_EXTENDED);
@@ -423,7 +425,7 @@ DOMTree *generateDOMTree(const char *HTML) {
                     str[strIndex] = '\0';
                     newNode = initANewDOMNode();
                     newNode->tag = TEXT_TAG;
-                    newNode->text = (char *)malloc(1024 * sizeof(char));
+                    newNode->text = (char *)malloc((strlen(str) + 1) * sizeof(char));
                     strcpy(newNode->text, str);
                     parrent = topNode();
                     addNodeToParent(&parrent, &newNode);
