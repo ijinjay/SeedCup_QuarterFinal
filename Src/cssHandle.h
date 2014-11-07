@@ -8,29 +8,17 @@
 
 enum cssType {
     typeSingle      = 0,
-    typeMulti       = 1,
-    typeParent      = 2,
-    typeInclude     = 3,
-    typeAnd         = 4,
+    typeMulti       = 1
 };
-enum NodeType {
-    classNode = 1,
-    idNode = 2,
-    elementNode = 3,
-};
-typedef struct node {
-    enum NodeType type;
-    char   name[30];
-    struct node* next;
-}node;
-typedef struct nodeList {
-    node* head;
-    int   type;
-    int   priority;
-}nodeList;
+
+typedef struct selectNode {
+    enum cssType type;
+    char   name[10][30];
+    int    nodeNum;
+}selectNode, *pSelectNode;
 
 typedef struct cssNode {
-    struct nodeList* nodes; 
+    selectNode *snodes; 
     enum cssType type;
     char display[10];
     char position[10];
@@ -54,9 +42,10 @@ typedef struct cssNode {
     unsigned defineFlag:18;
 }cssList, cssNode;
 
-extern cssList* handleCss(const char* buffer);
+extern cssList* handleCss(char* buffer);
 extern void freeCssList(cssList* csss);
-int getDefineState(const char* att, cssNode* css);
+extern int getDefineState(const char* att, cssNode* css);
+extern void printCSS(cssList *csss);
 //extern void
 #endif // _CSSHANDLE_H
 

@@ -32,135 +32,57 @@ static char attributes[18][15]= {
     "font-weight",  //17
     "line-break",   //18
 };
-static node* getNode(const char* buffer, int *pos);
-static ruleList* getRule(const char* buffer, int *pos);
-static int getErrorPos(char value[], int pos);
-static cssNode* initCssNode();
-static cssNode *ruleParser(nodeList* nodes, ruleList* rules);
-static int handleRule(cssNode* c, rule* r, int i);
-static int getPriority(node* n);
-cssList* handleCss(const char* buffer);
-int freeRuleList(ruleList *rules);
-int freeNodeList(nodeList* nodes);
-void freeCssList(cssList* csss);
 
-/****************************************************
- * ÄÚ²¿º¯ÊıgetNode
- * 		´¦ÀíÑ¡ÔñÆ÷ÖĞµ¥¸öÄ¿±ê
- * ÊäÈë²ÎÊı£º
- *		const char *buffer, int *pos
- * ·µ»ØÖµ£º
- *		node* newNode;
- * ×¢Òâ£º ·µ»ØµÄnewNodeĞèÒªÔÚ²»ÓÃµÄÊ±ºòÊÍ·ÅÄÚ´æ
- */
-static node* getNode(const char* buffer, int *pos) {
-    node* newNode = (node*)malloc(sizeof(node));
-    int namePos = 0;
-    char c = *(buffer + *pos);
-    (*pos)++;
-    if(c == '#')
-        newNode->type = idNode;
-    else if(c == '.')
-        newNode->type = classNode;
-    else if( isalnum(c)){
-        newNode->type = elementNode;
-        newNode->name[namePos++] = c;
-    }
-    while(isalnum(c = (*(buffer + *pos))))
-    {
-        newNode->name[namePos++] = c;
-        (*pos)++;
-    }
-    newNode->name[namePos] = '\0';
-    (*pos)--;
-    newNode->next = NULL;
+static int getErrorPos(char value[], int pos);
+static int handleRule(cssNode* c, rule* r, int i);
+static int freeRuleList(ruleList *rules);
+
+static pSelectNode initASelectNode(void) {
+    selectNode *newNode = (pSelectNode)malloc(sizeof(selectNode));
+    newNode->type = 0;
+    newNode->nodeNum = 0;
     return newNode;
 }
-/****************************************************
- * ÄÚ²¿º¯Êıselector
- * 		¹æÔòÑ¡ÔñÆ÷
- * ÊäÈë²ÎÊı£º
- *		const char *buffer, int *pos
- * ·µ»ØÖµ£º
- *		nodeList* newList;
-   ·µ»ØÑ¡ÔñÆ÷Ñ¡ÔñµÄ½ÚµãÁ´
- * ×¢Òâ£º ·µ»ØµÄnewListĞèÒªÔÚ²»ÓÃµÄÊ±ºòÊÍ·ÅÄÚ´æ
- */
-//¹æÔòÑ¡ÔñÆ÷
-static nodeList* selector(const char* buffer, int *pos)
-{
+
+// å•ä¸ªæˆ–å¤šä¸ªé€‰æ‹©å™¨
+static selectNode *selector(const char* buffer, int *pos) {
+    selectNode (*newSelect) = initASelectNode();
     char c;
-    nodeList* newList = (nodeList*)malloc(sizeof(nodeList));
-    newList->priority = 0;
-    node* head = (node*)malloc(sizeof(node));
-    node* currentNode;
-    currentNode = head;
-    newList->head = head;
-    while((c = *(buffer + *pos))!='{')
-    {
-        if(c == '#'||c=='.')
-        {
-            node* newNode;
-            if(*pos > 0)
-            {
-                if(isalnum(*(buffer + *pos - 1)))
-                {
-                    newList ->type = typeAnd;
-                }
-            }
-            newNode = getNode(buffer, pos);
-            currentNode->next = newNode;
-            currentNode = newNode;
+    int position = *(pos);
+    c = buffer[position];
+    char oneName[30];
+    int namePos = 0;
+    if (c == ' ')
+        c = buffer[++ position];
+    while( c !='{' ) {
+        if ( (isalnum(c)) || (c == '#') || c == '.' ) {
+            oneName[namePos ++] = c;
         }
-        else if(isalnum(c))
-        {
-            node* newNode;
-            newNode = getNode(buffer,pos);
-            currentNode->next = newNode;
-            currentNode = newNode;
+        else if (c == ' ') {
+            if ((buffer[position - 1] != ',' && buffer[position-1] != '}')
+                && (buffer[position +1] != ',' && buffer[position+1] != '{' )) 
+                oneName[namePos ++] = c;
         }
-        else if(isspace(c))
-        {
-            if(newList->type != typeMulti && newList->type != typeParent)
-            {
-                newList->type = typeInclude;
-            }
+        else if (c == ',') {
+            oneName[namePos] = '\0';
+            strcpy((*newSelect).name[(*newSelect).nodeNum ++], oneName);
+            namePos = 0;
         }
-        else if(c == '>')
-        {
-            newList->type = typeParent;
+        else if (c == '\0') {
+            return NULL;
         }
-        else if(c == ',')
-        {
-            newList->type = typeMulti;
+        else {
+            oneName[namePos ++] = c;
         }
-        (*pos)++;
+        c = buffer[++ position];
     }
-    if(head->next != NULL)
-    {
-        if(head->next->next == NULL)
-            newList->type = typeSingle;
-    }
-    node* t = newList->head->next;
-    while(t)
-    {
-        printf("%s type:%i\n",t->name,t->type);
-        newList->priority += getPriority(t);
-        printf("priotrity:%d\n",newList->priority);
-        t = t->next;
-    }
-    printf("%i\n",newList->type);
-    return newList;
+    oneName[namePos] = '\0';
+    strcpy((*newSelect).name[(*newSelect).nodeNum ++], oneName);
+    namePos = 0;
+    (*pos) = position + 1;
+
+    return newSelect;
 }
-/****************************************************
- * ÄÚ²¿º¯ÊıgetRule
- * 		´¦ÀíÒ»×é{}ÄÚµÄËùÓĞ¹æÔò
- * ÊäÈë²ÎÊı£º
- *		const char *buffer, int *pos
- * ·µ»ØÖµ£º
- *		ruleList* rules;
- * ×¢Òâ£º ·µ»ØµÄrulesĞèÒªÔÚ²»ÓÃµÄÊ±ºòÊÍ·ÅÄÚ´æ
- */
 static ruleList* getRule(const char* buffer, int *pos)
 {
     char c;
@@ -170,34 +92,25 @@ static ruleList* getRule(const char* buffer, int *pos)
     rule* currentRule = head;
     rules->head = head;
     (*pos)++;
-    while((c = *(buffer + *pos))!='}')
-    {
+    while((c = *(buffer + *pos))!='}') {
         while(isspace(c = *(buffer + *pos))) (*pos)++;
         rule* newRule = (rule*)malloc(sizeof(rule));
         newRule->valPos = 0;
         newRule->namePos = 0;
-        //´¦ÀíÊôĞÔÃû
-        while(isalnum(c = *(buffer + *pos))||(c = *(buffer +*pos))=='-')
-        {
+        while(isalnum(c = *(buffer + *pos))||(c = *(buffer +*pos))=='-') {
             newRule->name[newRule->namePos++] = c;
             (*pos)++;
         }
-         //Ìø¹ı¿Õ°×·û
-        while(isspace(c = *(buffer + *pos)))
-        {
+        while(isspace(c = *(buffer + *pos))) {
             (*pos)++;
         }
-        if((c = *(buffer + *pos)) == ':')
-        {
+        if((c = *(buffer + *pos)) == ':') {
             newRule->name[newRule->namePos++] = '\0';
             (*pos)++;
         }
-        //Ìø¹ı¿Õ°×·û
-        while(isspace(c = *(buffer + *pos)))
-        {
+        while(isspace(c = *(buffer + *pos))) {
             (*pos)++;
         }
-        //´¦ÀíÊôĞÔÖµ
         while(isalnum(c = *(buffer + *pos))||(c = *(buffer +*pos))=='%'||(c = *(buffer +*pos))=='#'||(c = *(buffer +*pos))=='-'||isspace((c = *(buffer +*pos)))) {
             newRule->value[newRule->valPos++] = c;
             (*pos)++;
@@ -227,49 +140,22 @@ static ruleList* getRule(const char* buffer, int *pos)
         //printf("%s\n",newRule->value);
         while(isspace(c = *(buffer + *pos))) (*pos)++;
     }
-    //rule* r = rules->head;
-    //while(r->next != NULL)
-    //{
-        //r = r->next;
-        //printf("%s\n",r->name);
-        //printf("%s\n",r->value);
-    //}
     return rules;
 }
-/****************************************************
- * ÄÚ²¿º¯ÊıgetErrorPos
- * 		È·¶¨È±ÉÙµÄ;µÄÎ»ÖÃ
- * ÊäÈë²ÎÊı£º
- *		const char *buffer, int *pos
- * ·µ»ØÖµ£º
- *		0£ºÑ°ÕÒÊ§°Ü
-        i: ;Ó¦¸Ã´¦ÓÚµÄÎ»ÖÃ
- */
-static int getErrorPos(char value[], int pos)
-{
-    for(int i = 0; i < pos; i++)
-    {
-        for(int j = 0; j < 18; j++)
-        {
+static int getErrorPos(char value[], int pos) {
+    for(int i = 0; i < pos; i++) {
+        for(int j = 0; j < 18; j++) {
             if(strcmp((value + i), attributes[j]) == 0)
                 return i;
         }
     }
     return 0;
 }
-/****************************************************
- * ÄÚ²¿º¯ÊıinitCssNode
- * 		³õÊ¼»¯Ò»¸öĞÂµÄCssNode
- * ÊäÈë²ÎÊı£º
- *		ÎŞ
- * ·µ»ØÖµ£º
- *		cssNode newCssNode
- */
-static cssNode* initCssNode()
-{
+static cssNode* initCssNode() {
      cssNode* newCssNode = (cssNode*)malloc(sizeof(cssNode));
      newCssNode->type = 0;
      newCssNode->next = NULL;
+     newCssNode->snodes = NULL;
      strcpy(newCssNode->display,"inline");
      strcpy(newCssNode->position,"static");
      strcpy(newCssNode->width,"auto");
@@ -300,67 +186,55 @@ static cssNode* initCssNode()
      newCssNode->defineFlag &= 0x00000;
      return newCssNode;
 }
-/****************************************************
- * ÄÚ²¿º¯ÊıruleParser
- * 		´¦ÀínodesºÍrules,ĞŞ¸ÄcssNode½Úµã
- * ÊäÈë²ÎÊı£º
- *		nodeList* nodes, ruleList* rules;
- * ·µ»ØÖµ£º
- *		cssNode* newCssNode
- * ×¢Òâ£º ·µ»ØµÄnewCssNodeĞèÒªÔÚ²»ÓÃµÄÊ±ºòÊÍ·ÅÄÚ´æ
-          ´Ëº¯ÊıÍê³ÉrulesÖĞ½ÚµãµÄÊÍ·Å
- */
-static cssNode *ruleParser(nodeList* nodes, ruleList* rules)
-{
+static cssNode *ruleParser(selectNode *snode, ruleList* rules) {
     cssNode* newCssNode = initCssNode();
     rule* currentRule;
     if(rules->head->next != NULL) currentRule = rules->head->next;
-    while(currentRule != NULL)
-    {
-        //Çå³ı¶àÓà¿Õ°×·û
+    while(currentRule != NULL) {
         int valueLen = strlen(currentRule->value);
-        for(int i = valueLen - 1; i >= 0; i--)
-        {
+        for(int i = valueLen - 1; i >= 0; i--) {
             if(isspace(currentRule->value[i]))
                 currentRule->value[i] = '\0';
             else
                 break;
         }
-        for(int i = 0; i < 18; i++)
-        {
-            if(strcmp(currentRule->name, attributes[i]) == 0)
-            {
+        for(int i = 0; i < 18; i++) {
+            if(strcmp(currentRule->name, attributes[i]) == 0) {
                 handleRule(newCssNode, currentRule, i);
                 break;
             }
         }
         currentRule = currentRule->next;
     }
-    node* currentNode;
-    if(nodes->head->next != NULL)
-    {
-        currentNode = nodes->head->next;
-        if(currentNode->next == NULL)
-        {
-            newCssNode->type = typeSingle;
-        }
-        newCssNode->nodes = nodes;
-    }
     freeRuleList(rules);
+    newCssNode->snodes = snode;
     return newCssNode;
 }
-/****************************************************
- * handleCss
- * 		¶ÔÒ»¸öÊı×éÄÚµÄCssĞÅÏ¢½øĞĞ´¦Àí£¬²¢½«Æä´æ´¢ÔÚCssListÖĞ
-        Í¨¹ıCssList»ñÈ¡cssÎÄ¼şĞÅÏ¢
- * ÊäÈë²ÎÊı:
- *		const char *buffer
- * ·µ»ØÖµ£º
- *		cssList* newCssList
- * ×¢Òâ£º ·µ»ØµÄrulesĞèÒªÔÚ²»ÓÃµÄÊ±ºòÊÍ·ÅÄÚ´æ
- */
-cssList* handleCss(const char* buffer)
+// pHTMLlä¸­çš„å¤šä½™ç©ºæ ¼åˆ å»ä¿ç•™ä¸€ä¸ªç©ºæ ¼
+static void preparse(char **pHTML) {
+    int len = strlen(*pHTML);
+    int space = 0;
+    char *preHTML = (char *)malloc( 10000 * sizeof(char));
+    int j = 0;
+    for (int i = 0; i < len; ++i) {
+        if (isspace((*pHTML)[i]))
+            space ++;
+        else {
+            if (space != 0) {
+                space = 0;
+                preHTML[j ++] = ' ';
+            }
+            preHTML[j ++] = (*pHTML)[i];
+        }
+    }
+    // å…³é—­å­—ç¬¦ä¸²
+    preHTML[j] = '\0';
+    free((*pHTML));
+    (*pHTML) = preHTML;
+}
+cssList* handleCss(char* buffer)
 {
+    preparse(&buffer);    
     int pos = 0;
     cssList *newCssList = initCssNode();
     cssNode *head = initCssNode();
@@ -368,31 +242,22 @@ cssList* handleCss(const char* buffer)
     cssNode* currentNode;
     currentNode = head;
     while(buffer[pos]!='\0') {
-        nodeList* nl = selector(buffer, &pos);
+        selectNode* nl = selector(buffer, &pos);
+        if (nl == NULL) {
+            break;
+        }
         ruleList* rl = getRule(buffer, &pos);
         cssNode *cssNewNode = ruleParser(nl, rl);
         currentNode->next = cssNewNode;
         currentNode = cssNewNode;
         pos++;
-        while(isspace(buffer[pos])) pos++;
     }
     return newCssList;
 }
-/****************************************************
- * ÄÚ²¿º¯ÊıhandleRule
- * 		¶ÔÊ¶±ğµÄ¹æÔò½øĞĞ´¦Àí²¢´æ´¢½øcssNodeÖĞ
- * ÊäÈë²ÎÊı£º
- *		cssNode* c, rule* r, int i
- * ·µ»ØÖµ£º
- *		0: ³É¹¦
-        1£ºÊ§°Ü
- */
-static int handleRule(cssNode* c, rule* r, int i)
-{
+static int handleRule(cssNode* c, rule* r, int i) {
     printf("attribute:%s value:%s\n",r->name,r->value);
     c->defineFlag |= (0x00001 << i);
-    switch(i)
-    {
+    switch(i) {
         case 0: strcpy(c->display, r->value);break;
         case 1: strcpy(c->position, r->value);break;
         case 2: strcpy(c->width, r->value);break;
@@ -423,21 +288,18 @@ static int handleRule(cssNode* c, rule* r, int i)
                 }
             };break;
         case 9:
-             {
+            {
                 int count = 0;
                 int len = strlen(r->value);
                 int t = 0;
                 int pos = 0;
-                while(t<len)
-                {
-                    if(isspace(r->value[t]))
-                    {
+                while(t<len) {
+                    if(isspace(r->value[t])) {
                         c->border[count][pos] = '\0';
                         count++;
                         pos = 0;
                     }
-                    else
-                    {
+                    else {
                         c->border[count][pos] = r->value[t];
                     }
                     t++;
@@ -449,16 +311,13 @@ static int handleRule(cssNode* c, rule* r, int i)
                 int len = strlen(r->value);
                 int t = 0;
                 int pos = 0;
-                while(t<len)
-                {
-                    if(isspace(r->value[t]))
-                    {
+                while(t<len) {
+                    if(isspace(r->value[t])) {
                         c->margin[count][pos] = '\0';
                         count++;
                         pos = 0;
                     }
-                    else
-                    {
+                    else {
                         c->margin[count][pos] = r->value[t];
                     }
                     t++;
@@ -475,24 +334,14 @@ static int handleRule(cssNode* c, rule* r, int i)
     }
     return 0;
 }
-/****************************************************
- * freeRuleList
- * 		ÊÍ·ÅruleListÖĞµÄ½áµãºÍËü×ÔÉí
- * ÊäÈë²ÎÊı£º
- *		ruleList *rules
- */
-int freeRuleList(ruleList *rules)
-{
-    if(rules->head->next == NULL)
-    {
+int freeRuleList(ruleList *rules) {
+    if(rules->head->next == NULL) {
         free(rules);
     }
-    else
-    {
+    else {
         rule* currentRule = rules->head->next;
         rule* temp;
-        while(currentRule)
-        {
+        while(currentRule) {
             temp = currentRule;
             currentRule = currentRule->next;
             free(temp);
@@ -501,91 +350,29 @@ int freeRuleList(ruleList *rules)
     }
     return 0;
 }
-/****************************************************
- * freeNodeList
- * 		ÊÍ·ÅNodeListÖĞµÄ½áµã
- * ÊäÈë²ÎÊı£º
- *		nodeList *nodes
- */
-int freeNodeList(nodeList* nodes)
-{
-    if(nodes->head == NULL)
-    {
-        printf("err");
-    }
-    else if(nodes->head->next == NULL)
-    {
-        //free(nodes);
-        printf("test");
-    }
-    else
-    {
-        node* currentNode = nodes->head->next;
-        node* temp;
-        while(currentNode)
-        {
-            temp = currentNode;
-            currentNode = currentNode->next;
-            free(temp);
-        }
-        //free(nodes);
-    }
-    return 0;
-}
-/****************************************************
- * freeRuleList
- * 		ÊÍ·ÅcssListÖĞµÄ½áµãºÍËü×ÔÉí
- * ÊäÈë²ÎÊı£º
- *		cssList *csss
- */
+
 void freeCssList(cssList* csss) {
-    if(csss->next == NULL) {
-        printf("NULL");
-        free(csss);
+    if(csss->next != NULL){
+        freeCssList(csss->next);
     }
-    else {
-        cssNode* currentNode = csss->next;
-        cssNode* temp;
-        while(currentNode != NULL) {
-            temp = currentNode;
-            currentNode = currentNode->next;
-            freeNodeList(temp->nodes);
-            free(temp);
-        }
-        free(csss);
+    if (csss->snodes != NULL) {
+        free(csss->snodes);
     }
+    free(csss);
 }
-/****************************************************
- * ÄÚ²¿º¯ÊıgetPriority
- * 		»ñÈ¡µ¥¸ö½ÚµãµÄÓÅÏÈ¼¶È¨ÖØ
- * ÊäÈë²ÎÊı£º
- *		node* n
- * ·µ»ØÖµ£º
- *		ÓÅÏÈ¼¶ int p
- */
-static int getPriority(node* n)
-{
-    int p;
-    if(n->type == classNode) p = 10;
-    else if(n->type == idNode) p = 100;
-    else if(n->type == elementNode) p = 1;
-    return p;
-}
-/****************************************************
- * ÄÚ²¿º¯ÊıgetDefaultState
- * 		»ñÈ¡css½ÚµãµÄ¶¨Òå×´Ì¬
- * ÊäÈë²ÎÊı£º
- *		const char* att, cssNode* css
- * ·µ»ØÖµ£º
- *		0   Î´¶¨Òå
-        ·Ç0 ÒÑ¶¨Òå
-        -1  ³ö´í
- */
-int getDefineState(const char* att, cssNode* css)
-{
-    for(int i = 0; i < 18; i++)
-    {
+
+
+int getDefineState(const char* att, cssNode* css){
+    for(int i = 0; i < 18; i++) {
         if(strcmp(att,attributes[i])==0)   return (css->defineFlag &= (0x00001 << i));
     }
     return -1;
+}
+void printCSS(cssList *csss) {
+    if (csss->next != NULL) {
+        printCSS(csss->next);
+    }
+    if (csss->snodes != NULL) {
+        printf("%s\n", csss->snodes->name[0]);
+    }
 }

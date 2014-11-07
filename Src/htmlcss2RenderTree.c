@@ -19,7 +19,7 @@ void freeRenderTree(pRenderNode head) {
 	free(head);
 }
 // 单个元素样式比较
-static int singleNodeCmp(node nnode, pDOMNode domNode){
+/*static int singleNodeCmp(node nnode, pDOMNode domNode){
 	if (nnode.type == elementNode)
 		return ((strcmp(nnode.name, getTagName(domNode->tag))==0) && (domNode->cssStyleNum <= CSSSTYLEMAXNUM ));
 	else if (nnode.type == idNode) 
@@ -30,9 +30,9 @@ static int singleNodeCmp(node nnode, pDOMNode domNode){
 				return 1;
 		}
 	return 0;
-}
+}*/
 // 多元素样式比较
-static int multiNodeCmp(node nnode, pDOMNode domNode) {
+/*static int multiNodeCmp(node nnode, pDOMNode domNode) {
 	node *pNode = &nnode;
 	while(pNode != NULL) {
 		if (singleNodeCmp((*pNode), domNode))
@@ -53,16 +53,16 @@ static int includeNodeCmp(node nnode, pDOMNode domNode) {
 static int andNodeCmp(node nnode, pDOMNode domNode) {
 
 	return 0;
-}
+}*/
 
-static void addCSSStyle2DOM(const cssList *csss, struct DOMNode **ppNode) {
+/*static void addCSSStyle2DOM(const cssList *csss, struct DOMNode **ppNode) {
 	for (int i = 0; i < (*ppNode)->sonNum; ++i) {
 		addCSSStyle2DOM(csss, &((*ppNode)->sonNodes[i]));
 	}
 	// 最多有CSSSTYLEMAXNUM个规则能匹配到一个节点
 	cssNode **cssStyle = (cssNode **)malloc(CSSSTYLEMAXNUM * sizeof(cssNode *));
 	// 得到第一个可用的css样式节点
-	cssNode *currentCss = csss->next;
+	// cssNode *currentCss = csss->next;
 	// 遍历整个css链表,将符合规则的css节点地址放入cssStyle;
 	while(currentCss != NULL) {
 		switch(currentCss->type) {
@@ -92,16 +92,20 @@ static void addCSSStyle2DOM(const cssList *csss, struct DOMNode **ppNode) {
 		currentCss = currentCss->next;
 	}
 }
+*/
 RenderNode *generateRenderTree(char *html, char *css) {
 	RenderNode *head = initANewRenderNode();
 	head->domNode = generateDOMTree(html);
 	// 可能没有css文件
 	if (strlen(css) != 0) {
 		head->css = handleCss(css); 
+		printf("Start print css\n");
+		printCSS(head->css);
+
 		// TODO 
 		// 获得第一个body节点
-		struct DOMNode *bodyNode = head->domNode->sonNodes[0];
-		addCSSStyle2DOM(head->css, &bodyNode);
+		// struct DOMNode *bodyNode = head->domNode->sonNodes[0];
+		// addCSSStyle2DOM(head->css, &bodyNode);
 	}
 	return head;
 }

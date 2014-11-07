@@ -17,7 +17,6 @@ static Color str2Color(const char *str) {
 	int len = strlen(str);
 	Color c;
 	unsigned int number = (unsigned int)strtol(str+1, NULL, 16);
-	printf("%d\n", number);
 	if (len == 4) {
 		c.R = (unsigned char)(((number & 0xf00)>>8) + ((number & 0xf00)>>4));
 		c.G = (unsigned char)(((number & 0x0f0)>>4) + ((number & 0x0f0)));
