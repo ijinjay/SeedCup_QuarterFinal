@@ -10,7 +10,6 @@ static pRenderNode initANewRenderNode(void) {
 	return newN;
 }
 void freeRenderTree(pRenderNode head) {
-	printf("free dom tree start \n");
 	freeDOMTree(head->domNode);
 	// 可能没有css文件
 	printf("free css start \n");
@@ -112,5 +111,49 @@ char *getWebText(RenderNode *head) {
 	return webText;
 }
 void drawPNG(pRenderNode head) {
-	printf("draw a png!\n");
+	CairoHandle *pCH = initDrawContext();
+	st_style style;
+    strcpy(style.offsetLeft,    "0px");
+    strcpy(style.offsetTop,     "0px");
+    strcpy(style.width,         "800px");
+    strcpy(style.height,        "600px");
+    strcpy(style.border[0],     "10px");
+    strcpy(style.border[1],     "10px");
+    strcpy(style.border[2],     "10px");
+    strcpy(style.border[3],     "10px");
+    strcpy(style.margin[0],     "10px");
+    strcpy(style.margin[1],     "10px");
+    strcpy(style.margin[2],     "10px");
+    strcpy(style.margin[3],     "10px");
+    strcpy(style.color,         "#00ffff");
+    drawBorder(pCH, style);
+    strcpy(style.offsetLeft,    "50px");
+    strcpy(style.offsetTop,     "50px");
+    strcpy(style.color,         "#0c0");
+    drawBorder(pCH, style);
+    strcpy(style.offsetLeft,    "30px");
+    strcpy(style.offsetTop,     "30px");
+    strcpy(style.color,         "#cf0");
+    drawBorder(pCH, style);
+
+// test draw text
+    strcpy(style.offsetLeft,    "500px");
+    strcpy(style.offsetTop,     "300px");
+    strcpy((style).font_style,    "normal");
+    strcpy((style).font_weight,   "normal");
+    strcpy((style).text_align,    "left");
+    strcpy((style).line_break,    "normal");
+    strcpy((style).font_size,    "20px");
+    strcpy(style.color,         "#c00");
+
+    drawText(pCH, "To beautiful you", style);
+    strcpy(style.offsetLeft,    "150px");
+    strcpy(style.offsetTop,     "150px");
+    strcpy((style).font_style,    "italic");
+    strcpy((style).font_weight,   "bold");
+    drawText(pCH, "I'm Jin Jay", style);
+    writeDrawFile(pCH, "test.png");
+    printf("draw a png\n");
+
+	freeDraw(pCH);
 }

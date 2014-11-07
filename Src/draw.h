@@ -22,7 +22,7 @@ typedef struct Pos {
 
 // 初始化绘图上下文
 extern CairoHandle *initDrawContext(void);
-extern void drawText(char *text, st_style style);
+extern void drawText(pCairoHandle pCH, const char *text, st_style style);
 extern void drawBorder(pCairoHandle pCH, st_style style);
 // 保存绘制的图形
 extern int writeDrawFile(pCairoHandle pCH, const char *filename);
