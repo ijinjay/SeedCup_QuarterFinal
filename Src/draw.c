@@ -35,6 +35,7 @@ static int px2int(const char *px) {
 	int pixel = (int)strtol(px, NULL, 10);
 	return pixel;
 }
+
 void drawBorder(pCairoHandle pCH, st_style style) {
 	Color rgb = str2Color(style.color);
 	printf("%d, %d, %d\n", rgb.R, rgb.G, rgb.B);

@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <regex.h>
+#include "cssHandle.h"
 
 enum TAG {
     NO_TAG = 0,
@@ -52,7 +53,9 @@ typedef struct st_style {
 #ifndef MAXHTMLLEN
 #define MAXHTMLLEN 10000
 #endif
-
+#ifndef CSSSTYLEMAXNUM
+#define CSSSTYLEMAXNUM 100
+#endif
 typedef struct DOMNode {
     enum TAG        tag;
     struct DOMNode  *sonNodes[MAXSONNUM];
@@ -64,6 +67,9 @@ typedef struct DOMNode {
     char            classes[20][20];
     int             classNum;
     char *          text; // 如果是文本，需要申请内存
+    // 节点适用的css样式链
+    cssNode **      cssStyle;
+    int             cssStyleNum;
 }DOMTree, *pDOMNode;
 
 typedef struct NodeStack {
@@ -90,5 +96,7 @@ extern void freeDOMTree(DOMTree *pHead);
 extern void printDOMNode(pDOMNode pNode);
 // 打印DOMTree
 extern void printDOMTree(DOMTree *pHead);
+// 
+extern char *getTagName(int tag);
 
 #endif // _HTML2DOM_H

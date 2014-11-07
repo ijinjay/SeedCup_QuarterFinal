@@ -9,9 +9,9 @@ typedef struct rule
     struct rule* next;
 }rule;
 typedef struct ruleList {
-    rule* head;          
+    rule* head;             
+    int type;
 }ruleList;
-
 static char attributes[18][15]= {
     "display",      //1
     "position",     //2
@@ -32,7 +32,6 @@ static char attributes[18][15]= {
     "font-weight",  //17
     "line-break",   //18
 };
-
 static node* getNode(const char* buffer, int *pos);
 static ruleList* getRule(const char* buffer, int *pos);
 static int getErrorPos(char value[], int pos);
@@ -44,6 +43,7 @@ cssList* handleCss(const char* buffer);
 int freeRuleList(ruleList *rules);
 int freeNodeList(nodeList* nodes);
 void freeCssList(cssList* csss);
+
 /****************************************************
  * 内部函数getNode
  * 		处理选择器中单个目标
@@ -297,6 +297,7 @@ static cssNode* initCssNode()
      strcpy(newCssNode->fontStyle,"normal");
      strcpy(newCssNode->fontWeight,"normal");
      strcpy(newCssNode->lineBreak,"normal");
+     newCssNode->defineFlag &= 0x00000;
      return newCssNode;
 }
 /****************************************************
@@ -362,7 +363,7 @@ cssList* handleCss(const char* buffer)
 {
     int pos = 0;
     cssList *newCssList = initCssNode();
-    cssNode* head = initCssNode();
+    cssNode *head = initCssNode();
     newCssList->next = head;
     cssNode* currentNode;
     currentNode = head;
@@ -389,6 +390,7 @@ cssList* handleCss(const char* buffer)
 static int handleRule(cssNode* c, rule* r, int i)
 {
     printf("attribute:%s value:%s\n",r->name,r->value);
+    c->defineFlag |= (0x00001 << i);
     switch(i)
     {
         case 0: strcpy(c->display, r->value);break;
@@ -568,4 +570,22 @@ static int getPriority(node* n)
     else if(n->type == idNode) p = 100;
     else if(n->type == elementNode) p = 1;
     return p;
+}
+/****************************************************
+ * 内部函数getDefaultState
+ * 		获取css节点的定义状态
+ * 输入参数：
+ *		const char* att, cssNode* css
+ * 返回值：
+ *		0   未定义
+        非0 已定义
+        -1  出错
+ */
+int getDefineState(const char* att, cssNode* css)
+{
+    for(int i = 0; i < 18; i++)
+    {
+        if(strcmp(att,attributes[i])==0)   return (css->defineFlag &= (0x00001 << i));
+    }
+    return -1;
 }

@@ -1,5 +1,5 @@
 #ifndef _CSSHANDLE_H
-#define _CSSHANDLE_H 
+#define _CSSHANDLE_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,15 +19,16 @@ enum NodeType {
     elementNode = 3,
 };
 typedef struct node {
-    enum NodeType    type;
+    enum NodeType type;
     char   name[30];
     struct node* next;
 }node;
 typedef struct nodeList {
-    node* head;             
+    node* head;
     int   type;
-    int   priority;  
+    int   priority;
 }nodeList;
+
 typedef struct cssNode {
     struct nodeList* nodes; 
     enum cssType type;
@@ -50,10 +51,12 @@ typedef struct cssNode {
     char fontWeight[10];
     char lineBreak[10];
     struct cssNode *next;
+    unsigned defineFlag:18;
 }cssList, cssNode;
 
 extern cssList* handleCss(const char* buffer);
 extern void freeCssList(cssList* csss);
-
+int getDefineState(const char* att, cssNode* css);
+//extern void
 #endif // _CSSHANDLE_H
 

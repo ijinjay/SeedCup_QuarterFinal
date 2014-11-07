@@ -35,7 +35,6 @@ int main(int argc, char const *argv[]) {
         free(cssurl);
         // 开始解析html和css文件
         RenderNode *renderHead = generateRenderTree(data, css);
-        printDOMTree(renderHead->domNode);
         char *webText = getWebText(renderHead);
         writeFile(webText, "web.txt");
         drawPNG(renderHead);
@@ -57,7 +56,6 @@ int main(int argc, char const *argv[]) {
 
         freeDraw(pCaiHandle);
     */
-
         freeRenderTree(renderHead);
         free(data);
         free(css);

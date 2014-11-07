@@ -45,6 +45,8 @@ static pDOMNode initANewDOMNode(void) {
     newNode->classNum = 0;
     newNode->fatherNode = NULL;
     newNode->text = NULL;
+    newNode->cssStyle = NULL;
+    newNode->cssStyleNum = 0;
     return newNode;
 }
 // 将一个节点添加为另一个节点的儿子节点
@@ -57,6 +59,9 @@ void freeDOMTree(DOMTree *pHead) {
     for (int i = 0; i < pHead->sonNum; ++i) {
         freeDOMTree(pHead->sonNodes[i]);
     }
+    // 将css样式的信息释放掉
+    if (pHead->cssStyle != NULL)
+        free(pHead->cssStyle);
     // 纯文本需要额外释放文本占用的内存
     if (pHead->tag == TEXT_TAG)
         free(pHead->text);
@@ -69,7 +74,7 @@ void printDOMTree(DOMTree *pHead) {
     }
     printDOMNode(pHead);
 }
-static char *getTagName(int tag) {
+char *getTagName(int tag) {
     switch(tag) {
         case HEAD_TAG:  return "head";
         case BODY_TAG:  return "body";

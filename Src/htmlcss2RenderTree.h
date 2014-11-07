@@ -6,9 +6,9 @@
 
 typedef struct RenderNode {
 	DOMTree *domNode;
-	cssList *css;
-	CairoHandle *pCH;
-	void (*drawFunction)(pCairoHandle pCH,st_style style);
+	cssList *css;		 // 供头结点使用
+	cssNode *csses[100]; // 供一般节点使用
+	int cssNum;
 } RenderNode, *pRenderNode;
 
 extern RenderNode *generateRenderTree(char *html, char *css);
