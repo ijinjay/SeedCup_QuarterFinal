@@ -67,9 +67,9 @@ typedef struct DOMNode {
     char            classes[20][20];
     int             classNum;
     char *          text; // 如果是文本，需要申请内存
-    // 节点适用的css样式链
-    cssNode **      cssStyle;
-    int             cssStyleNum;
+    // 节点适用的css样式数组
+    DOMCSSES *csses;
+
 }DOMTree, *pDOMNode;
 
 typedef struct NodeStack {

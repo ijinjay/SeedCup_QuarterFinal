@@ -19,7 +19,6 @@ typedef struct selectNode {
 
 typedef struct cssNode {
     selectNode *snodes; 
-    enum cssType type;
     char display[10];
     char position[10];
     char width[10];
@@ -41,6 +40,12 @@ typedef struct cssNode {
     struct cssNode *next;
     unsigned defineFlag:18;
 }cssList, cssNode;
+
+typedef struct DOMCSSES {
+    cssNode *      cssStyle[100];
+    int             cssStyleNum;
+    int             priorities[100];
+} DOMCSSES, *pDOMCSSES;
 
 extern cssList* handleCss(char* buffer);
 extern void freeCssList(cssList* csss);

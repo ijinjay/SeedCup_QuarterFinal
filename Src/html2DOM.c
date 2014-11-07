@@ -45,8 +45,7 @@ static pDOMNode initANewDOMNode(void) {
     newNode->classNum = 0;
     newNode->fatherNode = NULL;
     newNode->text = NULL;
-    newNode->cssStyle = NULL;
-    newNode->cssStyleNum = 0;
+    newNode->csses = NULL;
     return newNode;
 }
 // 将一个节点添加为另一个节点的儿子节点
@@ -60,8 +59,8 @@ void freeDOMTree(DOMTree *pHead) {
         freeDOMTree(pHead->sonNodes[i]);
     }
     // 将css样式的信息释放掉
-    if (pHead->cssStyle != NULL)
-        free(pHead->cssStyle);
+    if (pHead->csses != NULL)
+        free(pHead->csses);
     // 纯文本需要额外释放文本占用的内存
     if (pHead->tag == TEXT_TAG)
         free(pHead->text);
@@ -71,6 +70,9 @@ void freeDOMTree(DOMTree *pHead) {
 void printDOMTree(DOMTree *pHead) {
     for (int i = 0; i < pHead->sonNum; ++i) {
         printDOMTree(pHead->sonNodes[i]);
+    }
+    if (pHead->csses != NULL) {
+        printf("priorities: %d\n", pHead->csses->priorities[0]);
     }
     printDOMNode(pHead);
 }

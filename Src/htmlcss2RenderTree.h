@@ -10,6 +10,11 @@ typedef struct RenderNode {
 	cssNode *csses[100]; // 供一般节点使用
 	int cssNum;
 } RenderNode, *pRenderNode;
+enum eic {
+	typeElement,
+	typeID,
+	typeClass
+};
 
 extern RenderNode *generateRenderTree(char *html, char *css);
 extern char *getWebText(RenderNode *head);

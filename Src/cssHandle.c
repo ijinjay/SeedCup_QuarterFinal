@@ -59,14 +59,17 @@ static selectNode *selector(const char* buffer, int *pos) {
             oneName[namePos ++] = c;
         }
         else if (c == ' ') {
-            if ((buffer[position - 1] != ',' && buffer[position-1] != '}')
-                && (buffer[position +1] != ',' && buffer[position+1] != '{' )) 
+            if (   (buffer[position-1] != ',' && buffer[position-1] != '}')
+                && (buffer[position+1] != ',' && buffer[position+1] != '{')
+                && (buffer[position-1] != '>')
+                && (buffer[position+1] != '>') )
                 oneName[namePos ++] = c;
         }
         else if (c == ',') {
             oneName[namePos] = '\0';
             strcpy((*newSelect).name[(*newSelect).nodeNum ++], oneName);
             namePos = 0;
+            newSelect->type = typeMulti;
         }
         else if (c == '\0') {
             return NULL;
@@ -153,7 +156,6 @@ static int getErrorPos(char value[], int pos) {
 }
 static cssNode* initCssNode() {
      cssNode* newCssNode = (cssNode*)malloc(sizeof(cssNode));
-     newCssNode->type = 0;
      newCssNode->next = NULL;
      newCssNode->snodes = NULL;
      strcpy(newCssNode->display,"inline");
@@ -237,10 +239,8 @@ cssList* handleCss(char* buffer)
     preparse(&buffer);    
     int pos = 0;
     cssList *newCssList = initCssNode();
-    cssNode *head = initCssNode();
-    newCssList->next = head;
     cssNode* currentNode;
-    currentNode = head;
+    currentNode = newCssList;
     while(buffer[pos]!='\0') {
         selectNode* nl = selector(buffer, &pos);
         if (nl == NULL) {
