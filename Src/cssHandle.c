@@ -1,5 +1,38 @@
 #include "cssHandle.h"
 
+typedef struct rule
+{
+    char name[15];
+    int namePos;
+    char value[30];
+    int valPos;
+    struct rule* next;
+}rule;
+typedef struct ruleList {
+    rule* head;          
+}ruleList;
+
+static char attributes[18][15]= {
+    "display",      //1
+    "position",     //2
+    "width",        //3
+    "height",       //4
+    "top",          //5
+    "bottom",       //6
+    "left",         //7
+    "right",        //8
+    "padding",      //9
+    "border",       //10
+    "margin",       //11
+    "color",        //12
+    "font-size",    //13
+    "line-height",  //14
+    "text-align",   //15
+    "font-style",   //16
+    "font-weight",  //17
+    "line-break",   //18
+};
+
 static node* getNode(const char* buffer, int *pos);
 static ruleList* getRule(const char* buffer, int *pos);
 static int getErrorPos(char value[], int pos);
@@ -235,6 +268,8 @@ static int getErrorPos(char value[], int pos)
 static cssNode* initCssNode()
 {
      cssNode* newCssNode = (cssNode*)malloc(sizeof(cssNode));
+     newCssNode->type = 0;
+     newCssNode->next = NULL;
      strcpy(newCssNode->display,"inline");
      strcpy(newCssNode->position,"static");
      strcpy(newCssNode->width,"auto");
@@ -326,17 +361,15 @@ static cssNode *ruleParser(nodeList* nodes, ruleList* rules)
 cssList* handleCss(const char* buffer)
 {
     int pos = 0;
-    cssList* newCssList = malloc(sizeof(cssList));
-    cssNode* head = malloc(sizeof(cssNode));
-    newCssList->head = head;
-    head->next = NULL;
+    cssList *newCssList = initCssNode();
+    cssNode* head = initCssNode();
+    newCssList->next = head;
     cssNode* currentNode;
     currentNode = head;
     while(buffer[pos]!='\0') {
         nodeList* nl = selector(buffer, &pos);
         ruleList* rl = getRule(buffer, &pos);
         cssNode *cssNewNode = ruleParser(nl, rl);
-        cssNewNode->next = NULL;
         currentNode->next = cssNewNode;
         currentNode = cssNewNode;
         pos++;
@@ -504,12 +537,12 @@ int freeNodeList(nodeList* nodes)
  *		cssList *csss
  */
 void freeCssList(cssList* csss) {
-    if(csss->head->next == NULL) {
+    if(csss->next == NULL) {
         printf("NULL");
         free(csss);
     }
     else {
-        cssNode* currentNode = csss->head->next;
+        cssNode* currentNode = csss->next;
         cssNode* temp;
         while(currentNode != NULL) {
             temp = currentNode;
