@@ -1,3 +1,16 @@
-.jin{
+div#jin{
 	border: 1px 2px 3px 3px;
+}
+#div1,#jin
+{
+	margin: 0px 0px 0px 0px;
+}
+#div1.box1,.box   >   .class,.box #jin {
+	top: 10;
+}
+strong.box    em {
+	top: 10px;
+}
+#jin p>span{
+	top: 10px;
 }

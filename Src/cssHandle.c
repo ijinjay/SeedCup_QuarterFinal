@@ -37,6 +37,15 @@ static int getErrorPos(char value[], int pos);
 static int handleRule(cssNode* c, rule* r, int i);
 static int freeRuleList(ruleList *rules);
 
+DOMCSSES *initADomCSS(void) {
+    DOMCSSES *newNode = (pDOMCSSES)malloc(sizeof(DOMCSSES));
+    for (int i = 0; i < 100; ++i) {
+        newNode->cssStyle[i] = NULL;
+        newNode->priorities[i] = 0;
+    }
+    newNode->cssStyleNum = 0;
+    return newNode;
+}
 static pSelectNode initASelectNode(void) {
     selectNode *newNode = (pSelectNode)malloc(sizeof(selectNode));
     newNode->type = 0;
@@ -139,8 +148,6 @@ static ruleList* getRule(const char* buffer, int *pos)
         newRule->next = NULL;
         currentRule->next = newRule;
         currentRule = newRule;
-        //printf("%s\n",newRule->name);
-        //printf("%s\n",newRule->value);
         while(isspace(c = *(buffer + *pos))) (*pos)++;
     }
     return rules;
@@ -255,7 +262,7 @@ cssList* handleCss(char* buffer)
     return newCssList;
 }
 static int handleRule(cssNode* c, rule* r, int i) {
-    printf("attribute:%s value:%s\n",r->name,r->value);
+    // printf("attribute:%s value:%s\n",r->name,r->value);
     c->defineFlag |= (0x00001 << i);
     switch(i) {
         case 0: strcpy(c->display, r->value);break;
@@ -373,6 +380,9 @@ void printCSS(cssList *csss) {
         printCSS(csss->next);
     }
     if (csss->snodes != NULL) {
-        printf("%s\n", csss->snodes->name[0]);
+        for (int i = 0; i < csss->snodes->nodeNum; ++i) {
+            printf("%s\t", csss->snodes->name[i]);
+        }
+        printf("\n");
     }
 }

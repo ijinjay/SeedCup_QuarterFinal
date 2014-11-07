@@ -1,5 +1,6 @@
 #include "htmlcss2RenderTree.h"
 
+
 static pRenderNode initANewRenderNode(void) {
 	RenderNode *newN = (pRenderNode)malloc(sizeof(RenderNode));
 	newN->domNode = NULL;
@@ -12,42 +13,106 @@ static pRenderNode initANewRenderNode(void) {
 void freeRenderTree(pRenderNode head) {
 	freeDOMTree(head->domNode);
 	// 可能没有css文件
-	printf("free css start \n");
 	if (head->css != NULL)
 		freeCssList(head->css);
-	printf("free render tree start \n");
 	free(head);
 }
-// 
 static int getSinglePriority(DOMTree *domNode, char *content) {
 	switch(content[0]) {
 		case '#':
-			if (!strcmp(content, domNode->ID))
+			printf("ID %s, %s\n", content+1, domNode->ID);
+			if (!strcmp(content+1, domNode->ID)) 
 				return 100;
+			break;
 		case '.':
 				for (int i = 0; i < domNode->classNum; ++i) {
-					if (!strcmp(content, domNode->classes[i]))
+					if (!strcmp(content+1, domNode->classes[i])) 
 						return 10;
-				}
+				} break;
+		case ' ':
+		case '>':
+			if (!strcmp(content + 1, getTagName((domNode->tag))))
+				return 1;break;
 		default:
 			if (!strcmp(content, getTagName(domNode->tag)))
+			{
+				printf("------%s$---%s$----\n",content,getTagName(domNode->tag));
 				return 1;
+			}
 		break;
 	}
 	return 0;
 }
+static int typePriority(DOMTree **currentDom, char *currentStr, int *priority, int ifFather, int ifInclude, int ifBro) {
+	// 处理 '>'
+	if (ifFather) {
+		int tempPriority;
+		if((tempPriority = getSinglePriority((*currentDom)->fatherNode, currentStr)) == 0){
+			(*priority) = 0;
+			return 0;
+		}
+		else { 
+			(*priority) += tempPriority;
+			(*currentDom) = (*currentDom)->fatherNode;
+		}
+	}
+	// 若前一次特殊符号为' '
+	else if (ifInclude) {
+		int tempPriority;
+		// 若当前节点还有父节点时
+
+		while((*currentDom)->fatherNode != NULL) {
+			//若匹配成功，则停止向上遍历
+			if ((tempPriority = getSinglePriority((*currentDom)->fatherNode, currentStr)) != 0) {
+				(*priority) += tempPriority;
+				break;
+			}
+			//若匹配不成功，继续向上遍历查找
+			(*currentDom) = (*currentDom)->fatherNode;
+		}
+		// 遍历所有还未找到，则不匹配
+		if (tempPriority == 0) {
+			(*priority) = 0;
+			return 0;
+		}
+		(*currentDom) = (*currentDom)->fatherNode;
+	}
+	// 若特殊符号位'.'或'#',并且前一个字符为非特殊符号
+	else if (ifBro) {
+		int tempPriority;
+		// until here is right
+		printf("before getSingle: str:%s$,tag:%s$\n",currentStr,getTagName((*currentDom)->tag));
+		if ((tempPriority = getSinglePriority((*currentDom), currentStr))== 0) {
+			(*priority) = 0;
+			return 0;
+		}
+		printf("%d--------------\n",tempPriority);
+		(*priority) += tempPriority;
+	}
+	else {
+		int tempPriority;
+		int ifAddone = 0;
+		if ((currentStr[0] == ' ') || (currentStr[0] == '>')) {
+			ifAddone = 1;
+		}
+		if ((tempPriority = getSinglePriority((*currentDom), currentStr + ifAddone)) == 0) {
+			(*priority) = 0;
+			return 0;
+		}
+		(*priority) += tempPriority;
+	}
+	return (*priority);
+}
+
 // 单个元素样式比较，返回优先级
 static int singleNodeCmp(char *name, DOMTree *domNode){
 	// spos记录特殊符号的位置
-	int spos[10];
+	int spos[20];
 	// posNum记录特殊符号的个数
 	int posNum = 0;
 	spos[0] = 0;
 	for (int i = 0; i < strlen(name); ++i) {
-		if (name[i] == '.'
-			|| name[i] == '#'
-			|| name[i] == '>'
-			|| name[i] == ' ') {
+		if (name[i] == '.' || name[i] == '#' || name[i] == '>' || name[i] == ' ') {
 			spos[posNum ++] = i;
 		}
 	}
@@ -60,67 +125,24 @@ static int singleNodeCmp(char *name, DOMTree *domNode){
 	// 优先级
 	int priority = 0;
 	DOMTree *currentDom = domNode;
+	// 特殊情况
+	if (posNum == 0) {
+		return getSinglePriority(domNode, name);
+	}
 	// 解析整个字符串
 	for (int i = posNum - 1; i >= 0; --i) {
-		char currentStr[20];
-		int j = 0;
 		// 两个特殊符号在一起，需要跳过
 		if (spos[i] == spos[i+1] - 1)
 			continue;
+		char currentStr[20];
+		int j = 0;
 		for (int k = spos[i]; k < spos[i + 1]; ++k)
 			currentStr[j ++] = name[k];
 		currentStr[j] = '\0';
-		// 若特殊符号为'>'
-		if (ifFather) {
-			int tempPriority;
-			if((tempPriority = getSinglePriority(domNode->fatherNode, currentStr)) == 0){
-				priority = 0;
-				break;
-			}
-			else { 
-				priority += tempPriority;
-				currentDom = domNode->fatherNode;
-			}
+		if (typePriority(&currentDom, currentStr, &priority, ifFather, ifInclude, ifBro) == 0) {
+			return 0;
 		}
-		// 若特殊符号为' '
-		else if (ifInclude) {
-			int tempPriority;
-			// 若当前节点还有父节点时
-			while(currentDom->fatherNode != NULL) {
-				//若匹配成功，则停止向上遍历
-				if ((tempPriority = getSinglePriority(currentDom->fatherNode, currentStr)) != 0) {
-					priority += tempPriority;
-					break;
-				}
-				//若匹配不成功，继续向上遍历查找
-				currentDom = currentDom->fatherNode;
-			}
-			// 遍历所有还未找到，则不匹配
-			if (tempPriority == 0) {
-				priority = 0;
-				break;
-			}
-		}
-		// 若特殊符号位'.'或'#',并且前一个字符为非特殊符号
-		else if (ifBro) {
-			int tempPriority;
-			if ((tempPriority = getSinglePriority(currentDom, currentStr) == 0)) {
-				priority = 0;
-				break;
-			}
-			priority += tempPriority;
-		}
-		else {
-			int tempPriority;
-			if ((tempPriority = getSinglePriority(currentDom, currentStr)) == 0) {
-				priority = 0;
-				break;
-			}
-			priority += tempPriority;
-		}
-		// 更新标记位
-		if ((currentStr[0] != ' ') && (currentStr[0] != '>'))
-			getSinglePriority(domNode, currentStr);
+		// 更新标记位	
 		if (spos[i] > 0 && (name[spos[i]] == '>' || name[spos[i]-1] == '>'))
 			ifFather = 1;
 		else
@@ -136,26 +158,31 @@ static int singleNodeCmp(char *name, DOMTree *domNode){
 		else
 			ifBro = 0;
 	}
-	if (spos[0] == 0) {
-		priority = getSinglePriority(currentDom, name);
+	// 处理#id或者.class这一类情况
+	if (spos[0] == 0 && priority != 0 && posNum == 1) {
+		// 处理 #id .class这种情况
+		return priority;
 	}
+	// 处理#id#id类似的情况
+
+	// 处理element#id或element.class或element .class或element>#id这种情况
 	else {
 		if (priority == 0)
 			return 0;
-		else {
-			int temp;
+		else if(spos[0] != 0) {
 			char currentStr[20];
 			int j = 0;
 			for (int i = 0; i < spos[0]; ++i)
 				currentStr[j ++] = name[i];
 			currentStr[j] = '\0';
-			if ((temp = getSinglePriority(currentDom, currentStr)) == 0) 
+			int temp = 0;
+			printf("im waiting for to pass ,%s, %s, P:%d\n", currentStr, getTagName(currentDom->tag),priority);
+			if ((temp = typePriority(&currentDom, currentStr, &priority, ifFather, ifInclude, ifBro)) == 0)
 				return 0;
-			priority += temp;
-			return priority;
+			// priority += temp;
 		}
 	}
-	return 0;
+	return priority;
 }
 // 多元素样式比较
 /*static int multiNodeCmp(node nnode, pDOMNode domNode) {
@@ -173,22 +200,33 @@ static void addCSSStyle2DOM(const cssList *csss, struct DOMNode **ppNode) {
 	for (int i = 0; i < (*ppNode)->sonNum; ++i) {
 		addCSSStyle2DOM(csss, &((*ppNode)->sonNodes[i]));
 	}
-	if ((*ppNode)->tag == TEXT_TAG)
+	if ((*ppNode)->tag == TEXT_TAG) {
 		return;
+	}
 	// 最多有CSSSTYLEMAXNUM个规则能匹配到一个节点
-	DOMCSSES *domcccc = (DOMCSSES *)malloc(sizeof(DOMCSSES));
+	DOMCSSES *domcccc = initADomCSS();
 	// 得到第一个可用的css样式节点
 	cssNode *currentCss = csss->next;
 	// 遍历整个css链表,将符合规则的css节点地址放入cssStyle;
 	int priority = 0;
-	currentCss = currentCss->next;
 	while(currentCss != NULL) {
 		if (currentCss->snodes != NULL) {
-			printf("not NULL\n");
 			for (int i = 0; i < currentCss->snodes->nodeNum; ++i) {
 				if ((priority = singleNodeCmp(currentCss->snodes->name[i], *ppNode)) != 0) {
 					domcccc->cssStyle[domcccc->cssStyleNum ++] = currentCss;
 					domcccc->priorities[domcccc->cssStyleNum - 1] = priority;
+					// 交换排序
+					for (int i = domcccc->cssStyleNum - 1; i > 0 ; --i) {
+						if (domcccc->priorities[i] < domcccc->priorities[i-1]) {
+							cssNode *tempNode = domcccc->cssStyle[i];
+							domcccc->cssStyle[i] = domcccc->cssStyle[i-1];
+							domcccc->cssStyle[i-1] = tempNode;
+							int temp = domcccc->priorities[i];
+							domcccc->priorities[i] = domcccc->priorities[i-1];
+							domcccc->priorities[i] = domcccc->priorities[i-1];
+							domcccc->priorities[i-1] = temp;
+						}
+					}
 				}
 			}
 		}
@@ -200,10 +238,15 @@ static void addCSSStyle2DOM(const cssList *csss, struct DOMNode **ppNode) {
 RenderNode *generateRenderTree(char *html, char *css) {
 	RenderNode *head = initANewRenderNode();
 	head->domNode = generateDOMTree(html);
+	if (head->domNode == NULL) {
+		return NULL;
+	}
 	// 可能没有css文件
 	if (strlen(css) != 0) {
+		if (strlen(css) > MAXHTMLLEN) {
+			return NULL;
+		}
 		head->css = handleCss(css); 
-		printf("Start print css\n");
 		printCSS(head->css);
 		// TODO 
 		// 获得第一个body节点

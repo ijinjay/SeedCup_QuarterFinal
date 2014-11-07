@@ -39,7 +39,6 @@ int readHtml(char* buffer, const char* dir) {
 int readCss(char* buffer, const char* dir, const char* fileName) {
     char fullName[30];
     sprintf(fullName, "%s/%s", dir, fileName);
-    printf("css filename is %s\n", fullName);
     FILE *cssFp = fopen(fullName, "r+");
     if(cssFp == NULL)
         return -1;

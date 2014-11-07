@@ -51,6 +51,7 @@ extern cssList* handleCss(char* buffer);
 extern void freeCssList(cssList* csss);
 extern int getDefineState(const char* att, cssNode* css);
 extern void printCSS(cssList *csss);
+extern DOMCSSES *initADomCSS(void);
 //extern void
 #endif // _CSSHANDLE_H
 

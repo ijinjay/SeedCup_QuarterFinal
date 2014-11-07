@@ -71,10 +71,13 @@ void printDOMTree(DOMTree *pHead) {
     for (int i = 0; i < pHead->sonNum; ++i) {
         printDOMTree(pHead->sonNodes[i]);
     }
-    if (pHead->csses != NULL) {
-        printf("priorities: %d\n", pHead->csses->priorities[0]);
+    if (pHead->tag != TEXT_TAG && pHead->tag != DOCUMENT_TAG) {
+        printf("**************************************\n");
+        for (int i = 0; i < pHead->csses->cssStyleNum; ++i) {
+            printf("%s's prio is %d\n", getTagName(pHead->tag), pHead->csses->priorities[i]);
+        }
     }
-    printDOMNode(pHead);
+    // printDOMNode(pHead);
 }
 char *getTagName(int tag) {
     switch(tag) {
@@ -127,7 +130,7 @@ void printDOMNode(pDOMNode pNode) {
     printf("\tline-break: %s;\n", pNode->style.line_break);
     printf("}\n");
 } 
-// pHTMLl中的多余空格删去保留一个空格
+// HTML中的多余空格删去保留一个空格
 static void preparse(char **pHTML) {
     int len = strlen(*pHTML);
     int space = 0;
@@ -144,10 +147,26 @@ static void preparse(char **pHTML) {
             preHTML[j ++] = (*pHTML)[i];
         }
     }
-    // 关闭字符串
     preHTML[j] = '\0';
-    free((*pHTML));
-    (*pHTML) = preHTML;
+    // 修正
+    len = strlen(preHTML);
+    j = 0;
+    int enter = 0;
+    for (int i = 0; i < len; ++i) {
+        if (preHTML[i] == '<') {
+            enter = 1;
+        }
+        if (enter && preHTML[i] == '>') {
+            enter = 0;
+        }
+        if (enter && preHTML[i] == ' ') 
+            if (preHTML[i-1] == '=' || preHTML[i+1] == '=') 
+                continue;
+        (*pHTML)[j++] = preHTML[i];
+    }
+    (*pHTML)[j] = '\0';
+    // 关闭字符串
+    free(preHTML);
 }
 // 多次正则匹配，将多个匹配结果存入pMultiResult
 static pMultiResult regexMul(const char *pattern, const char *str, int left, int right) {
@@ -165,6 +184,7 @@ static pMultiResult regexMul(const char *pattern, const char *str, int left, int
                 str + shift + pmatch[0].rm_so + left,
                 pmatch[0].rm_eo - pmatch[0].rm_so - (left + right));
         shift += pmatch[0].rm_eo;
+        r->results[r->num -1][pmatch[0].rm_eo - pmatch[0].rm_so - (left + right)] = '\0';
     }
     return r;
 }
@@ -187,7 +207,7 @@ CSSURL *parseCSSURL(char **pHTML) {
                 (*pHTML) + shift + pmatch[0].rm_so+12,
                 pmatch[0].rm_eo-pmatch[0].rm_so-14);
         (cssurl->urls[cssurl->urlNum-1])[pmatch[0].rm_eo-pmatch[0].rm_so-14] = '\0';
-        printf("css name is %s\n", cssurl->urls[cssurl->urlNum - 1]);
+        // printf("css name is %s\n", cssurl->urls[cssurl->urlNum - 1]);
         shift += pmatch[0].rm_eo;
     }
     regcomp(&reg, "<head>.*</head>", REG_EXTENDED);
@@ -353,6 +373,10 @@ static void changeAB(int *a, int *b) {
 // 产生DOMTree
 DOMTree *generateDOMTree(const char *HTML) {
     // important! 初始化static参数，每次调用时都必须初始化
+    if (strlen(HTML) > MAXHTMLLEN) {
+        printf("Cannot parse for the length of HTML is too long.\n");
+        return NULL;
+    }
     initStack();
     initErrorStack();
     // 树节点，节点类型为document
