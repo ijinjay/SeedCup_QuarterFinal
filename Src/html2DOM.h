@@ -92,11 +92,11 @@ extern CSSURL *parseCSSURL(char **pHTML);
 extern DOMTree *generateDOMTree(const char *HTML);
 // 释放DOM树占用的内存
 extern void freeDOMTree(DOMTree *pHead);
-// 打印节点的style
-extern void printDOMNode(pDOMNode pNode);
 // 打印DOMTree
 extern void printDOMTree(DOMTree *pHead);
 // 
 extern char *getTagName(int tag);
-
+extern void print2File(DOMTree *pNode, FILE *f,char **pstr);
+// 打印节点的style
+extern void printDOMNode(pDOMNode pNode, FILE *f);
 #endif // _HTML2DOM_H

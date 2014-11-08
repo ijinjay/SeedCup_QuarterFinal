@@ -53,8 +53,9 @@ int readCss(char* buffer, const char* dir, const char* fileName) {
 }
 int writeFile(char* data, const char* dirName)
 {
-    char fileName[20] = "web";
-    strcat(fileName, dirName + 4);
+    char fileName[20];
+    // strcat(fileName, dirName + 4);
+    strcpy(fileName, dirName);
     strcat(fileName, ".txt");
     FILE *outPut = fopen(fileName, "w+");
     if(outPut == NULL)

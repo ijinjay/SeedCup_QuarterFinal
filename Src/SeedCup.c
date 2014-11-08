@@ -39,7 +39,13 @@ int main(int argc, char const *argv[]) {
         if (renderHead != NULL) {
             printDOMTree(renderHead->domNode);
             char *webText = getWebText(renderHead);
-            writeFile(webText, "web.txt");
+            char fileName[100];
+            sprintf(fileName, "%s.txt", head->dir);
+            FILE *f = fopen(fileName, "w");
+            char *h = (char *)malloc(200 * sizeof(char));
+            print2File(renderHead->domNode, f, &h);
+            free(h);
+            fclose(f);
             drawPNG(renderHead);
             
             free(webText);

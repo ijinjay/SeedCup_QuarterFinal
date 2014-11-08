@@ -42,6 +42,7 @@ static pDOMNode initANewDOMNode(void) {
         newNode->sonNodes[i] = NULL;
         strcpy(newNode->classes[i], "");
     }
+    newNode->ID[0] = '\0';
     newNode->classNum = 0;
     newNode->fatherNode = NULL;
     newNode->text = NULL;
@@ -97,39 +98,86 @@ char *getTagName(int tag) {
     return "unknown";
 }
 // 打印节点style内容
-void printDOMNode(pDOMNode pNode) {
-    printf("%s{\n", getTagName(pNode->tag));
-    printf("\toffsetLeft: %s;\n", pNode->style.offsetLeft);
-    printf("\toffsetTop: %s;\n", pNode->style.offsetTop);
-    printf("\tdisplay: %s;\n", pNode->style.display);
-    printf("\tposition: %s;\n", pNode->style.position);
-    printf("\twidth: %s;\n", pNode->style.width);
-    printf("\theight: %s;\n", pNode->style.height);
-    printf("\tpadding: %s %s %s %s;\n",  pNode->style.padding[0],
+void printDOMNode(pDOMNode pNode, FILE *f) {
+    fprintf(f, "\toffsetLeft: %s;\n", pNode->style.offsetLeft);
+    fprintf(f, "\toffsetTop: %s;\n", pNode->style.offsetTop);
+    fprintf(f, "\tdisplay: %s;\n", pNode->style.display);
+    fprintf(f, "\tposition: %s;\n", pNode->style.position);
+    fprintf(f, "\twidth: %s;\n", pNode->style.width);
+    fprintf(f, "\theight: %s;\n", pNode->style.height);
+    fprintf(f, "\tpadding: %s %s %s %s;\n",  pNode->style.padding[0],
                                         pNode->style.padding[1],
                                         pNode->style.padding[2],
                                         pNode->style.padding[3]);
-    printf("\tborder: %s %s %s %s;\n",   pNode->style.border[0],
+    fprintf(f, "\tborder: %s %s %s %s;\n",   pNode->style.border[0],
                                         pNode->style.border[1],
                                         pNode->style.border[2],
                                         pNode->style.border[3]);
-    printf("\tmargin: %s %s %s %s;\n",   pNode->style.margin[0],
+    fprintf(f, "\tmargin: %s %s %s %s;\n",   pNode->style.margin[0],
                                         pNode->style.margin[1],
                                         pNode->style.margin[2],
                                         pNode->style.margin[3]);
-    printf("\tleft: %s;\n", pNode->style.left);
-    printf("\tright: %s;\n", pNode->style.right);
-    printf("\ttop: %s;\n", pNode->style.top);
-    printf("\tbottom: %s;\n", pNode->style.bottom);
-    printf("\tcolor: %s;\n", pNode->style.color);
-    printf("\tline-height: %s;\n", pNode->style.line_height);
-    printf("\tfont-size: %s;\n", pNode->style.font_size);
-    printf("\tfont-style: %s;\n", pNode->style.font_style);
-    printf("\tfont-weight: %s;\n", pNode->style.font_weight);
-    printf("\ttext-align: %s;\n", pNode->style.text_align);
-    printf("\tline-break: %s;\n", pNode->style.line_break);
-    printf("}\n");
+    fprintf(f, "\tleft: %s;\n", pNode->style.left);
+    fprintf(f, "\tright: %s;\n", pNode->style.right);
+    fprintf(f, "\ttop: %s;\n", pNode->style.top);
+    fprintf(f, "\tbottom: %s;\n", pNode->style.bottom);
+    fprintf(f, "\tcolor: %s;\n", pNode->style.color);
+    fprintf(f, "\tline-height: %s;\n", pNode->style.line_height);
+    fprintf(f, "\tfont-size: %s;\n", pNode->style.font_size);
+    fprintf(f, "\tfont-style: %s;\n", pNode->style.font_style);
+    fprintf(f, "\tfont-weight: %s;\n", pNode->style.font_weight);
+    fprintf(f, "\ttext-align: %s;\n", pNode->style.text_align);
+    fprintf(f, "\tline-break: %s;\n", pNode->style.line_break);
+    fprintf(f, "}");
 } 
+
+void print2File(DOMTree *pNode, FILE *f, char **pstr) {
+    // 第一个是document节点，可以直接遍历子节点
+    char finalStr[100];
+    finalStr[0] = '\0';
+    int sonRank = 0;
+    if (strlen(*pstr) != 0){
+        sprintf(finalStr, "%s", *pstr);
+        printf("%s\n", finalStr);
+    }
+    for (int i = 0; i < pNode->sonNum; ++i) {
+        // 跳过文本节点和display等于none的节点
+        char tempStr[100];
+        if (strlen(finalStr) != 0)
+            strcpy(tempStr, finalStr);
+        if (    (pNode->sonNodes[i]->tag != TEXT_TAG) 
+            &&  (strcmp(pNode->sonNodes[i]->style.display, "none") != 0) ) {
+            if (pNode->sonNodes[i]->tag != BODY_TAG) {
+                // printf("enter son node --- %s\n", tempStr);
+                fprintf(f, "\n\n");
+                sprintf(tempStr, "%s>%s", tempStr,getTagName(pNode->sonNodes[i]->tag));
+                // 打印出节点
+                if (strlen(pNode->sonNodes[i]->ID) != 0)
+                    sprintf(tempStr, "%s#%s", tempStr,pNode->sonNodes[i]->ID);
+                for (int j = 0; j < pNode->sonNodes[i]->classNum; ++j) {
+                    sprintf(tempStr, "%s.%s", tempStr,pNode->sonNodes[i]->classes[j]);
+                }
+                sprintf(tempStr, "%s[%d]", tempStr, sonRank ++);
+                sprintf(*pstr, "%s", tempStr);
+                fprintf(f, "%s{\n", tempStr);
+            }
+            else {
+                printf("enter body node\n");
+                sprintf(tempStr, "body");
+                if (strlen(pNode->sonNodes[i]->ID) != 0) {
+                    sprintf(tempStr, "%s#%s", tempStr, pNode->sonNodes[i]->ID);
+                }
+                for (int j = 0; j < pNode->sonNum; ++j)
+                    sprintf(tempStr, "%s.%s", tempStr,pNode->sonNodes[i]->classes[j]);
+                fprintf(f, "%s{\n", tempStr);
+            }
+            printDOMNode(pNode, f);
+            if (strlen(tempStr) != 0)
+                sprintf(*pstr, "%s",tempStr);
+        }
+        print2File(pNode->sonNodes[i], f, pstr);
+    }
+}
 // HTML中的多余空格删去保留一个空格
 static void preparse(char **pHTML) {
     int len = strlen(*pHTML);
