@@ -64,7 +64,7 @@ static selectNode *selector(const char* buffer, int *pos) {
     if (c == ' ')
         c = buffer[++ position];
     while( c !='{' ) {
-        if ( (isalnum(c)) || (c == '#') || c == '.' ) {
+        if ( (isalnum(c)) || (c == '#') || c == '.') {
             oneName[namePos ++] = c;
         }
         else if (c == ' ') {
@@ -123,7 +123,7 @@ static ruleList* getRule(const char* buffer, int *pos)
         while(isspace(c = *(buffer + *pos))) {
             (*pos)++;
         }
-        while(isalnum(c = *(buffer + *pos))||(c = *(buffer +*pos))=='%'||(c = *(buffer +*pos))=='#'||(c = *(buffer +*pos))=='-'||isspace((c = *(buffer +*pos)))) {
+        while(isalnum(c = *(buffer + *pos))||(c = *(buffer +*pos))=='%'||(c = *(buffer +*pos))=='.'||(c = *(buffer +*pos))=='#'||(c = *(buffer +*pos))=='-'||isspace((c = *(buffer +*pos)))) {
             newRule->value[newRule->valPos++] = c;
             (*pos)++;
         }
@@ -186,12 +186,12 @@ static cssNode* initCssNode() {
      strcpy(newCssNode->margin[2],"0");
      strcpy(newCssNode->margin[3],"0");
      strcpy(newCssNode->color, "#000");
-     strcpy(newCssNode->fontSize,"16px");
-     strcpy(newCssNode->lineHeight,"1.2");
-     strcpy(newCssNode->textAlign,"left");
-     strcpy(newCssNode->fontStyle,"normal");
-     strcpy(newCssNode->fontWeight,"normal");
-     strcpy(newCssNode->lineBreak,"normal");
+     strcpy(newCssNode->font_size,"16px");
+     strcpy(newCssNode->line_height,"1.2");
+     strcpy(newCssNode->text_align,"left");
+     strcpy(newCssNode->font_style,"normal");
+     strcpy(newCssNode->font_weight,"normal");
+     strcpy(newCssNode->line_break,"normal");
      newCssNode->defineFlag &= 0x00000;
      return newCssNode;
 }
@@ -262,8 +262,7 @@ cssList* handleCss(char* buffer)
     return newCssList;
 }
 static int handleRule(cssNode* c, rule* r, int i) {
-    // printf("attribute:%s value:%s\n",r->name,r->value);
-    c->defineFlag |= (0x00001 << i);
+    c->defineFlag = (c->defineFlag ^ (0x00001 << i));
     switch(i) {
         case 0: strcpy(c->display, r->value);break;
         case 1: strcpy(c->position, r->value);break;
@@ -331,12 +330,12 @@ static int handleRule(cssNode* c, rule* r, int i) {
                 }
             };break;
         case 11:strcpy(c->color,r->value);break;
-        case 12:strcpy(c->fontSize,r->value);break;
-        case 13:strcpy(c->lineHeight,r->value);break;
-        case 14:strcpy(c->textAlign,r->value);break;
-        case 15:strcpy(c->fontStyle,r->value);break;
-        case 16:strcpy(c->fontWeight,r->value);break;
-        case 17:strcpy(c->lineBreak,r->value);break;
+        case 12:strcpy(c->font_size,r->value);break;
+        case 13:strcpy(c->line_height,r->value);break;
+        case 14:strcpy(c->text_align,r->value);break;
+        case 15:strcpy(c->font_style,r->value);break;
+        case 16:strcpy(c->font_weight,r->value);break;
+        case 17:strcpy(c->line_break,r->value);break;
         default: return 1;break;
     }
     return 0;
@@ -371,7 +370,9 @@ void freeCssList(cssList* csss) {
 
 int getDefineState(const char* att, cssNode* css){
     for(int i = 0; i < 18; i++) {
-        if(strcmp(att,attributes[i])==0)   return (css->defineFlag &= (0x00001 << i));
+        if(strcmp(att,attributes[i])==0)   {
+            return (css->defineFlag & (0x00001 << i));
+        }
     }
     return -1;
 }

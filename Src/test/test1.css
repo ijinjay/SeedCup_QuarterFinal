@@ -10,6 +10,12 @@ div#jin{
 }
 strong.box    em {
 	top: 10px;
+	display: hehhehe;
+	font-size: 99px;
+}
+.box {
+	line-height: 1.5;
+	font-weight: bold;
 }
 #jin p>span{
 	top: 10px;

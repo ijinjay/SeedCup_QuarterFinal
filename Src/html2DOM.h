@@ -56,6 +56,15 @@ typedef struct st_style {
 #ifndef CSSSTYLEMAXNUM
 #define CSSSTYLEMAXNUM 100
 #endif
+enum inheritStyles { 
+    INHERIT_COLOR,
+    INHERIT_FONT_SIZE,
+    INHERIT_LINE_HEIGHT,
+    INHERIT_TEXT_ALIGN,
+    INHERIT_FONT_STYLE,
+    INHERIT_FONT_WEIGHT,
+    INHERIT_LINE_BREAK
+};
 typedef struct DOMNode {
     enum TAG        tag;
     struct DOMNode  *sonNodes[MAXSONNUM];
@@ -69,7 +78,7 @@ typedef struct DOMNode {
     char *          text; // 如果是文本，需要申请内存
     // 节点适用的css样式数组
     DOMCSSES *csses;
-
+    int inheritStyle[7];
 }DOMTree, *pDOMNode;
 
 typedef struct NodeStack {

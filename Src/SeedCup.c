@@ -36,7 +36,7 @@ int main(int argc, char const *argv[]) {
         // 开始解析html和css文件
         RenderNode *renderHead = generateRenderTree(data, css);
         // 可能因为文件太大而不能处理
-        if (renderHead != NULL) {
+        // if (renderHead != NULL) {
             printDOMTree(renderHead->domNode);
             char *webText = getWebText(renderHead);
             char fileName[100];
@@ -50,7 +50,7 @@ int main(int argc, char const *argv[]) {
             
             free(webText);
             freeRenderTree(renderHead);
-        }
+        // }
         free(data);
         free(css);
         head = head->next;

@@ -47,6 +47,8 @@ static pDOMNode initANewDOMNode(void) {
     newNode->fatherNode = NULL;
     newNode->text = NULL;
     newNode->csses = NULL;
+    for (int i = 0; i < 7; ++i)
+        newNode->inheritStyle[i] = 0;
     return newNode;
 }
 // 将一个节点添加为另一个节点的儿子节点
@@ -138,7 +140,6 @@ void print2File(DOMTree *pNode, FILE *f, char **pstr) {
     int sonRank = 0;
     if (strlen(*pstr) != 0){
         sprintf(finalStr, "%s", *pstr);
-        printf("%s\n", finalStr);
     }
     for (int i = 0; i < pNode->sonNum; ++i) {
         // 跳过文本节点和display等于none的节点
@@ -162,7 +163,6 @@ void print2File(DOMTree *pNode, FILE *f, char **pstr) {
                 fprintf(f, "%s{\n", tempStr);
             }
             else {
-                printf("enter body node\n");
                 sprintf(tempStr, "body");
                 if (strlen(pNode->sonNodes[i]->ID) != 0) {
                     sprintf(tempStr, "%s#%s", tempStr, pNode->sonNodes[i]->ID);
@@ -171,7 +171,7 @@ void print2File(DOMTree *pNode, FILE *f, char **pstr) {
                     sprintf(tempStr, "%s.%s", tempStr,pNode->sonNodes[i]->classes[j]);
                 fprintf(f, "%s{\n", tempStr);
             }
-            printDOMNode(pNode, f);
+            printDOMNode(pNode->sonNodes[i], f);
             if (strlen(tempStr) != 0)
                 sprintf(*pstr, "%s",tempStr);
         }

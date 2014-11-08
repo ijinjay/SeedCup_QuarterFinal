@@ -31,12 +31,12 @@ typedef struct cssNode {
     char border[4][10];
     char margin[4][10];
     char color[10];
-    char fontSize[10];
-    char lineHeight[10];
-    char textAlign[10];
-    char fontStyle[10];
-    char fontWeight[10];
-    char lineBreak[10];
+    char font_size[10];
+    char line_height[10];
+    char text_align[10];
+    char font_style[10];
+    char font_weight[10];
+    char line_break[10];
     struct cssNode *next;
     unsigned defineFlag:18;
 }cssList, cssNode;

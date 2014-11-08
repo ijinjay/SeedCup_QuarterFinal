@@ -20,7 +20,6 @@ void freeRenderTree(pRenderNode head) {
 static int getSinglePriority(DOMTree *domNode, char *content) {
 	switch(content[0]) {
 		case '#':
-			printf("ID %s, %s\n", content+1, domNode->ID);
 			if (!strcmp(content+1, domNode->ID)) 
 				return 100;
 			break;
@@ -34,9 +33,7 @@ static int getSinglePriority(DOMTree *domNode, char *content) {
 			if (!strcmp(content + 1, getTagName((domNode->tag))))
 				return 1;break;
 		default:
-			if (!strcmp(content, getTagName(domNode->tag)))
-			{
-				printf("------%s$---%s$----\n",content,getTagName(domNode->tag));
+			if (!strcmp(content, getTagName(domNode->tag))) {
 				return 1;
 			}
 		break;
@@ -81,12 +78,10 @@ static int typePriority(DOMTree **currentDom, char *currentStr, int *priority, i
 	else if (ifBro) {
 		int tempPriority;
 		// until here is right
-		printf("before getSingle: str:%s$,tag:%s$\n",currentStr,getTagName((*currentDom)->tag));
 		if ((tempPriority = getSinglePriority((*currentDom), currentStr))== 0) {
 			(*priority) = 0;
 			return 0;
 		}
-		printf("%d--------------\n",tempPriority);
 		(*priority) += tempPriority;
 	}
 	else {
@@ -176,7 +171,6 @@ static int singleNodeCmp(char *name, DOMTree *domNode){
 				currentStr[j ++] = name[i];
 			currentStr[j] = '\0';
 			int temp = 0;
-			printf("im waiting for to pass ,%s, %s, P:%d\n", currentStr, getTagName(currentDom->tag),priority);
 			if ((temp = typePriority(&currentDom, currentStr, &priority, ifFather, ifInclude, ifBro)) == 0)
 				return 0;
 			// priority += temp;
@@ -184,23 +178,89 @@ static int singleNodeCmp(char *name, DOMTree *domNode){
 	}
 	return priority;
 }
-// 多元素样式比较
-/*static int multiNodeCmp(node nnode, pDOMNode domNode) {
-	node *pNode = &nnode;
-	while(pNode != NULL) {
-		if (singleNodeCmp((*pNode), domNode))
-			return 1;
-		pNode = pNode->next;
-	}
-	return 0;
+#ifndef UPDATECSSSTYLEATTR
+#define UPDATECSSSTYLEATTR(x) {if (getDefineState(#x, (tempNode))) 	\
+	strcpy((*domNode)->style.x, tempNode->x);						\
+};													 
+#endif
+#ifndef UPDATEINHERITSTYLE
+#define UPDATEINHERITSTYLE(X,y) { 										\
+	if ((*domNode)->inheritStyle[ X ] != 1)		{						\
+		strcpy((*domNode)->style.y, (*domNode)->fatherNode->style.y);	\
+	}\
 }
-*/
+#endif
+static void updateCssAtt(DOMTree **domNode) {
+	for (int i = 0; i < (*domNode)->csses->cssStyleNum; ++i) {
+		cssNode *tempNode = (*domNode)->csses->cssStyle[i];
 
-static void addCSSStyle2DOM(const cssList *csss, struct DOMNode **ppNode) {
-	for (int i = 0; i < (*ppNode)->sonNum; ++i) {
-		addCSSStyle2DOM(csss, &((*ppNode)->sonNodes[i]));
+		UPDATECSSSTYLEATTR(display);
+		UPDATECSSSTYLEATTR(position);
+		UPDATECSSSTYLEATTR(width);
+		UPDATECSSSTYLEATTR(height);
+		UPDATECSSSTYLEATTR(bottom);
+		UPDATECSSSTYLEATTR(left);
+		UPDATECSSSTYLEATTR(right);
+
+		if (getDefineState("margin", tempNode))
+			for (int i = 0; i < 4; ++i)
+				strcpy((*domNode)->style.margin[i], tempNode->margin[i]);
+		if (getDefineState("border", tempNode))
+			for (int i = 0; i < 4; ++i)
+				strcpy((*domNode)->style.border[i], tempNode->border[i]);
+		if (getDefineState("padding", tempNode))
+			for (int i = 0; i < 4; ++i)
+				strcpy((*domNode)->style.padding[i], tempNode->padding[i]);
+
+		if (getDefineState("color", tempNode)) {
+			strcpy((*domNode)->style.color, tempNode->color);
+			(*domNode)->inheritStyle[INHERIT_COLOR] = 1;
+		}
+
+		if (getDefineState("font-size", tempNode)) {
+			strcpy((*domNode)->style.font_size, tempNode->font_size);
+			(*domNode)->inheritStyle[INHERIT_FONT_SIZE] = 1;
+		}
+		if (getDefineState("line-height", tempNode)) {
+			strcpy((*domNode)->style.line_height, tempNode->line_height);
+			(*domNode)->inheritStyle[INHERIT_LINE_HEIGHT] = 1;
+		}
+		if (getDefineState("text-align", tempNode)) {
+			strcpy((*domNode)->style.text_align, tempNode->text_align);
+			(*domNode)->inheritStyle[INHERIT_TEXT_ALIGN] = 1;
+		}
+		if (getDefineState("font-style", tempNode)) {
+			strcpy((*domNode)->style.font_style, tempNode->font_style);
+			(*domNode)->inheritStyle[INHERIT_FONT_STYLE] = 1;
+		}
+		if (getDefineState("font-weight", tempNode)) {
+			strcpy((*domNode)->style.font_weight, tempNode->font_weight);
+			(*domNode)->inheritStyle[INHERIT_FONT_WEIGHT] = 1;
+		}
+		if (getDefineState("line-break", tempNode)) {
+			strcpy((*domNode)->style.line_break, tempNode->line_break);
+			(*domNode)->inheritStyle[INHERIT_LINE_BREAK] = 1;
+		}
 	}
+	UPDATEINHERITSTYLE(INHERIT_COLOR, color);
+	UPDATEINHERITSTYLE(INHERIT_FONT_SIZE, font_size);
+	UPDATEINHERITSTYLE(INHERIT_FONT_STYLE, font_style);
+	UPDATEINHERITSTYLE(INHERIT_FONT_WEIGHT, font_weight);
+	UPDATEINHERITSTYLE(INHERIT_LINE_BREAK, line_break);
+	UPDATEINHERITSTYLE(INHERIT_LINE_HEIGHT, line_height);
+	UPDATEINHERITSTYLE(INHERIT_TEXT_ALIGN, text_align);
+}
+
+static void addCSSStyle2DOM(const cssList *csss, struct DOMNode **ppNode) {	
 	if ((*ppNode)->tag == TEXT_TAG) {
+		// 文本直接继承包含元素的继承属性
+		strcpy((*ppNode)->style.color, (*ppNode)->fatherNode->style.color);
+		strcpy((*ppNode)->style.font_size, (*ppNode)->fatherNode->style.font_size);
+		strcpy((*ppNode)->style.font_style, (*ppNode)->fatherNode->style.font_style);
+		strcpy((*ppNode)->style.font_weight, (*ppNode)->fatherNode->style.font_weight);
+		strcpy((*ppNode)->style.line_break, (*ppNode)->fatherNode->style.line_break);
+		strcpy((*ppNode)->style.line_height, (*ppNode)->fatherNode->style.line_height);
+		strcpy((*ppNode)->style.text_align, (*ppNode)->fatherNode->style.text_align);
 		return;
 	}
 	// 最多有CSSSTYLEMAXNUM个规则能匹配到一个节点
@@ -233,8 +293,20 @@ static void addCSSStyle2DOM(const cssList *csss, struct DOMNode **ppNode) {
 		currentCss = currentCss->next;
 	}
 	(*ppNode)->csses = domcccc;
-}
+	updateCssAtt(ppNode);
 
+	for (int i = 0; i < (*ppNode)->sonNum; ++i) {
+		addCSSStyle2DOM(csss, &((*ppNode)->sonNodes[i]));
+	}
+}
+static void calculateStyle(DOMTree **ppNode) {
+	if (strcmp((*ppNode)->style.display, "none") == 0 )
+		return;
+
+	for (int i = 0; i < (*ppNode)->sonNum; ++i) {
+		calculateStyle(&((*ppNode)->sonNodes[i]));
+	}
+}
 RenderNode *generateRenderTree(char *html, char *css) {
 	RenderNode *head = initANewRenderNode();
 	head->domNode = generateDOMTree(html);
@@ -248,10 +320,11 @@ RenderNode *generateRenderTree(char *html, char *css) {
 		}
 		head->css = handleCss(css); 
 		printCSS(head->css);
-		// TODO 
 		// 获得第一个body节点
 		struct DOMNode *bodyNode = head->domNode->sonNodes[0];
 		addCSSStyle2DOM(head->css, &bodyNode);
+		// TODO 计算 
+		calculateStyle(&bodyNode);
 	}
 	return head;
 }
