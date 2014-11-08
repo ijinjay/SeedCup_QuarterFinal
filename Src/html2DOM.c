@@ -134,6 +134,8 @@ void printDOMNode(pDOMNode pNode, FILE *f) {
 } 
 
 void print2File(DOMTree *pNode, FILE *f, char **pstr) {
+    if (strcmp(pNode->style.display, "none") == 0)
+        return;
     // 第一个是document节点，可以直接遍历子节点
     char finalStr[100];
     finalStr[0] = '\0';
@@ -315,11 +317,15 @@ static void modifyElementStyle(pDOMNode *ppNode) {
         case LINK_TAG:
             strcpy(((*ppNode)->style).display, "none");break;
         case STRONG_TAG:
+            // 更新默认继承关系
             strcpy(((*ppNode)->style).font_weight, "bold");
+            (*ppNode)->inheritStyle[INHERIT_FONT_WEIGHT] = 1;
         case SPAN_TAG:
             strcpy(((*ppNode)->style).display, "inline");break;
         case EM_TAG:
-            strcpy(((*ppNode)->style).font_weight, "italic");
+            // 更新默认继承关系
+            strcpy(((*ppNode)->style).font_style, "italic");
+            (*ppNode)->inheritStyle[INHERIT_FONT_STYLE] = 1;
             strcpy(((*ppNode)->style).display, "inline");break;
         case BODY_TAG: 
             strcpy(((*ppNode)->style).margin[0], "8px");
@@ -337,6 +343,9 @@ static void modifyElementStyle(pDOMNode *ppNode) {
             strcpy(((*ppNode)->style).margin[3], "0");
             strcpy(((*ppNode)->style).display, "block");break;
         case H_TAG:
+            // 更新默认继承关系
+            (*ppNode)->inheritStyle[INHERIT_FONT_SIZE] = 1;
+            (*ppNode)->inheritStyle[INHERIT_FONT_WEIGHT] = 1;
             strcpy(((*ppNode)->style).font_size, "32px");
             strcpy(((*ppNode)->style).font_weight, "bold");
             strcpy(((*ppNode)->style).margin[0], "0.67em");

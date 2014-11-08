@@ -36,9 +36,10 @@ int main(int argc, char const *argv[]) {
         // 开始解析html和css文件
         RenderNode *renderHead = generateRenderTree(data, css);
         // 可能因为文件太大而不能处理
-        // if (renderHead != NULL) {
+        if (renderHead != NULL) {
             printDOMTree(renderHead->domNode);
             char *webText = getWebText(renderHead);
+            // 得到文件名
             char fileName[100];
             sprintf(fileName, "%s.txt", head->dir);
             FILE *f = fopen(fileName, "w");
@@ -46,11 +47,12 @@ int main(int argc, char const *argv[]) {
             print2File(renderHead->domNode, f, &h);
             free(h);
             fclose(f);
-            drawPNG(renderHead);
+            sprintf(fileName, "%s.png", head->dir);
+            drawPNG(renderHead, fileName);
             
             free(webText);
             freeRenderTree(renderHead);
-        // }
+        }
         free(data);
         free(css);
         head = head->next;

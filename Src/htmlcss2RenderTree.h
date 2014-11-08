@@ -19,5 +19,5 @@ enum eic {
 extern RenderNode *generateRenderTree(char *html, char *css);
 extern char *getWebText(RenderNode *head);
 extern void freeRenderTree(pRenderNode head);
-extern void drawPNG(pRenderNode head);
+extern void drawPNG(pRenderNode head, const char *fileName);
 #endif // _HTMLCSS2RENDERTREE_H

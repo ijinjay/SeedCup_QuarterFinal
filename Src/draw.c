@@ -30,11 +30,31 @@ static Color str2Color(const char *str) {
 	return c;
 }
 
-static int px2int(const char *px) {
+extern int px2int(const char *px) {
 	int pixel = (int)strtol(px, NULL, 10);
+	// printf("pixel is %d\n", pixel);
+	if (strcmp(px, "auto") == 0)
+		return 100;
 	return pixel;
 }
-
+extern int em2int(const char *em, int fontsize) {
+	int emNum = (int)strtol(em, NULL, 10);
+	return emNum * fontsize;
+}
+int percent2int(const char *percent, int fatherwidth) {
+	int percentNum = (int)strtol(percent, NULL , 10);
+	return (int)((percentNum / 100.0)* fatherwidth);
+}
+int len2int(const char *str, int fontsize, int fatherwidth) {
+	int strLen = strlen(str);
+	if (strLen > 2 && strcmp(str + strLen - 2, "em") == 0)
+		return em2int(str, fontsize);
+	if (strLen > 2 && strcmp(str + strLen -2, "px") == 0)
+		return px2int(str);
+	if (str[strLen - 1] == '%')
+		return percent2int(str, fatherwidth);
+	return (int)strtol(str, NULL, 10);
+}
 void drawBorder(pCairoHandle pCH, st_style style) {
 	Color rgb = str2Color(style.color);
 	cairo_set_source_rgb(pCH->cr, rgb.R, rgb.G, rgb.B);
@@ -45,11 +65,18 @@ void drawBorder(pCairoHandle pCH, st_style style) {
 					   	+ px2int(style.margin[0])
 					   	+ px2int(style.border[0]) /2 ;
 	double border_right = px2int(style.offsetLeft)
+						+ px2int(style.padding[3])
+						+ px2int(style.padding[1])
+						+ px2int(style.margin[3])
 					   	+ px2int(style.width)
-					   	- px2int(style.border[1]) /2 ;
+					   	+ px2int(style.border[1]) /2 ;
 	double border_down	= px2int(style.offsetTop)
 					   	+ px2int(style.height)
-					   	- px2int(style.border[2]) /2 ;
+					   	+ px2int(style.margin[0])
+					   	+ px2int(style.border[0])
+					   	+ px2int(style.border[3])
+					   	+ px2int(style.border[0])
+					   	+ px2int(style.border[2]) /2 ;
 	// 左上到右上
 	cairo_set_line_width(pCH->cr, px2int(style.border[0]));
 	cairo_move_to(pCH->cr, border_left, border_top);

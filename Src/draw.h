@@ -28,4 +28,7 @@ extern void drawBorder(pCairoHandle pCH, st_style style);
 extern int writeDrawFile(pCairoHandle pCH, const char *filename);
 // 结束绘图
 extern void freeDraw(pCairoHandle ph);
+extern int px2int(const char *px);
+extern int em2int(const char *em, int fontsize);
+extern int len2int(const char *str, int fontsize, int fatherwidth);
 #endif // _DRAW_H
