@@ -210,8 +210,9 @@ static void updateCssAtt(DOMTree **domNode) {
 				strcpy((*domNode)->style.border[i], tempNode->border[i]);
 		if (getDefineState("padding", tempNode))
 			for (int i = 0; i < 4; ++i)
+			{
 				strcpy((*domNode)->style.padding[i], tempNode->padding[i]);
-
+			}
 		if (getDefineState("color", tempNode)) {
 			strcpy((*domNode)->style.color, tempNode->color);
 			(*domNode)->inheritStyle[INHERIT_COLOR] = 1;
@@ -308,8 +309,7 @@ static void calculateWidth(DOMTree **ppNode, char* fatherWidth) {
 	int mrFlag =  strcmp((*ppNode)->style.margin[1], "auto");
 	// int lFlag = strcmp((*ppNode)->style.left, "auto");
 	// int rFlag = strcmp((*ppNode)->style.right, "auto");
-	if(strcmp((*ppNode)->style.position, "absolute") ){
-		printf("hehehhhehheheeheeeee\n");
+	if(!strcmp((*ppNode)->style.position, "absolute") ){
 		// // TODO
 		// if(!lFlag && !rFlag && !widthFlag) {
 		// 	if(!mlFlag) marginLeft = 0;
@@ -323,10 +323,10 @@ static void calculateWidth(DOMTree **ppNode, char* fatherWidth) {
 
 	}
 	else{
-		int margin3,margin1;
+		int margin3 = 0,margin1 = 0;
 		int border3 = px2int((*ppNode)->style.border[3]);
-		int border1= px2int((*ppNode)->style.border[1]);
-		int padding3=len2int((*ppNode)->style.padding[3], fontsize, fatherw);
+		int border1 = px2int((*ppNode)->style.border[1]);
+		int padding3 = len2int((*ppNode)->style.padding[3], fontsize, fatherw);
 		int padding1 = len2int((*ppNode)->style.padding[1], fontsize, fatherw);
 
 		if(widthFlag && mlFlag && mrFlag) {
@@ -334,7 +334,7 @@ static void calculateWidth(DOMTree **ppNode, char* fatherWidth) {
 		} 
 		if(!widthFlag && mlFlag &&mrFlag) {
 			int margin3 =  len2int((*ppNode)->style.margin[3], fontsize, fatherw);
-			int margin1 = len2int((*ppNode)->style.margin[1], fontsize, fatherw);
+			int margin1 =  len2int((*ppNode)->style.margin[1], fontsize, fatherw);
 			width = fatherw - margin3 - margin1 - border1 -border3-padding3-padding1;
 		}
 		else if(widthFlag && !mlFlag && !mrFlag) {
@@ -367,6 +367,7 @@ static void calculateWidth(DOMTree **ppNode, char* fatherWidth) {
 			width = len2int((*ppNode)->style.width, fontsize, fatherw);
 			margin3 =  fatherw-margin1-width-padding1-padding3-border1-border3;
 		}
+
 		sprintf((*ppNode)->style.margin[3], "%dpx", margin3);
 		sprintf((*ppNode)->style.margin[1], "%dpx", margin1);
 		sprintf((*ppNode)->style.border[3], "%dpx", border3);
@@ -379,46 +380,42 @@ static void calculateWidth(DOMTree **ppNode, char* fatherWidth) {
 }
 
 static void calculateStyle(DOMTree **ppNode) {
-	printf("calculate style %s\n", getTagName((*ppNode)->tag));
-	if((*ppNode)->tag == BODY_TAG)
-		return;
-	DOMTree* fatherNode = (*ppNode)->fatherNode;
-	if(!strcmp((*ppNode)->style.display,"none"))
-		return ;
-	if(!strcmp((*ppNode)->style.display,"inline")) {
-		//行内元素等待撑开
-		strcpy((*ppNode)->style.height,"auto");
-		strcpy((*ppNode)->style.width,"auto");
-	}
-	if(!strcmp((*ppNode)->style.display,"block")){
-		if (strcmp(fatherNode->style.width, "auto")) {
-			strcpy((*ppNode)->style.width, "auto");
+	// BODY_TAG没有父节点
+	if((*ppNode)->tag != BODY_TAG) {
+		DOMTree* fatherNode = (*ppNode)->fatherNode;
+		if(!strcmp((*ppNode)->style.display,"none"))
+			return ;
+		if(!strcmp((*ppNode)->style.display,"inline")) {
+			//行内元素等待撑开
+			strcpy((*ppNode)->style.height,"auto");
+			strcpy((*ppNode)->style.width,"auto");
 		}
-		else {
-			calculateWidth(ppNode, fatherNode->style.width);
+		if(!strcmp((*ppNode)->style.display,"block")){
+			if (!strcmp(fatherNode->style.width, "auto")) {
+				strcpy((*ppNode)->style.width, "auto");
+			}
+			else {
+				calculateWidth(ppNode, fatherNode->style.width);
+			}
 		}
-	}
-	// TODO 计算出所有应该计算出的值
-	// width, height, offsetLeft, offsetToop, padding
-	// top, right, bottom, left
-	// border
-	// margin
-	if (strcmp((*ppNode)->style.display, "none") == 0 )
-		return;
+		
+		if (strcmp((*ppNode)->style.display, "none") == 0 )
+			return;
 
-	if ((*ppNode)->tag == TEXT_TAG) {
-		int textlen = strlen((*ppNode)->text);
-		int fontsize = px2int((*ppNode)->style.font_size);
-		sprintf((*ppNode)->style.width, "%dpx", fontsize * textlen);
-		char *str = (*ppNode)->style.line_height;
-		int lineHLen = strlen(str);
-		int line_height = 0; 
-		if (strcmp(str + lineHLen -2, "px") == 0)
-			line_height = px2int(str);
-		else
-			line_height = (int) fontsize * strtof((*ppNode)->style.line_height, NULL);
-		sprintf((*ppNode)->style.height, "%dpx", line_height);
-		return;
+		if ((*ppNode)->tag == TEXT_TAG) {
+			int textlen = strlen((*ppNode)->text);
+			int fontsize = px2int((*ppNode)->style.font_size);
+			sprintf((*ppNode)->style.width, "%dpx", fontsize * textlen);
+			char *str = (*ppNode)->style.line_height;
+			int lineHLen = strlen(str);
+			int line_height = 0; 
+			if (strcmp(str + lineHLen -2, "px") == 0)
+				line_height = px2int(str);
+			else
+				line_height = (int) fontsize * strtof((*ppNode)->style.line_height, NULL);
+			sprintf((*ppNode)->style.height, "%dpx", line_height);
+			return;
+		}
 	}
 
 	for (int i = 0; i < (*ppNode)->sonNum; ++i) {
@@ -431,7 +428,7 @@ static void secondeCalcuStyle(DOMTree **ppNode) {
 	}
 	int height = 0;
 	int width = 0;
-	if (strcmp((*ppNode)->style.height, "auto")) {
+	if (!strcmp((*ppNode)->style.height, "auto")) {
 		for (int i = 0; i < (*ppNode)->sonNum; ++i) {
 			DOMTree *sonNode = (*ppNode)->sonNodes[i];
 			int margin0 = px2int(sonNode->style.margin[0]);
@@ -441,11 +438,11 @@ static void secondeCalcuStyle(DOMTree **ppNode) {
 			int padding0 = px2int(sonNode->style.padding[0]);
 			int padding2 = px2int(sonNode->style.padding[2]);
 			int sonheight = px2int(sonNode->style.height);
-			height += margin0 + margin2 + border0 + border2 + padding0 + padding2 + sonheight;
+			height = height + margin0 + margin2 + border0 + border2 + padding0 + padding2 + sonheight;
 		}
 		sprintf((*ppNode)->style.height, "%dpx", height);
 	}
-	if (strcmp((*ppNode)->style.width, "auto")) {
+	if (!strcmp((*ppNode)->style.width, "auto")) {
 		for (int i = 0; i < (*ppNode)->sonNum; ++i) {
 			DOMTree *sonNode = (*ppNode)->sonNodes[i];
 			int margin1 = px2int(sonNode->style.margin[1]);
@@ -456,7 +453,7 @@ static void secondeCalcuStyle(DOMTree **ppNode) {
 			int padding3 = px2int(sonNode->style.padding[3]);
 			int sonwidth = px2int(sonNode->style.width);
 			int temp = margin1 + margin3 + border1 + border3 + padding1 + padding3 + sonwidth;
-			width = height > temp ? height : temp;
+			width = width > temp ? width: temp;
 		}
 		sprintf((*ppNode)->style.width, "%dpx", width);
 	}
@@ -480,10 +477,10 @@ static void offsetCalcuStyle(DOMTree **ppNode, int left, int top) {
 					+ px2int((*ppNode)->sonNodes[i]->style.margin[2])  
 					+ px2int((*ppNode)->sonNodes[i]->style.border[2])
 					+ px2int((*ppNode)->sonNodes[i]->style.padding[2])
-					+ px2int((*ppNode)->sonNodes[i]->style.width);
+					+ px2int((*ppNode)->sonNodes[i]->style.height);
 	}
 }
-RenderNode *generateRenderTree(char *html, char *css) {
+RenderNode *generateRenderTree(char *html, char *css, char *fileName) {
 	RenderNode *head = initANewRenderNode();
 	head->domNode = generateDOMTree(html);
 	if (head->domNode == NULL) {
@@ -495,24 +492,20 @@ RenderNode *generateRenderTree(char *html, char *css) {
 			return NULL;
 		}
 		head->css = handleCss(css); 
-		printCSS(head->css);
+		// printCSS(head->css);
 		// 获得第一个body节点
 		struct DOMNode *bodyNode = head->domNode->sonNodes[0];
 		addCSSStyle2DOM(head->css, &bodyNode);
 		// TODO 计算 
+
 		calculateStyle(&bodyNode);
 		secondeCalcuStyle(&bodyNode);
-		
-		// calculateStyle(&bodyNode);
+		calculateStyle(&bodyNode);
 		offsetCalcuStyle(&bodyNode, 0, 0);
 	}
 	return head;
 }
-char *getWebText(RenderNode *head) {
-	char *webText = (char *)malloc( MAXHTMLLEN*2*sizeof(char));
-	strcpy(webText, "To beautiful you");
-	return webText;
-}
+
 static void drawANode(DOMTree *domNode, CairoHandle *pCH) {
 	if (domNode->tag != TEXT_TAG)
 		drawBorder(pCH, domNode->style);
@@ -523,48 +516,7 @@ static void drawANode(DOMTree *domNode, CairoHandle *pCH) {
 	}
 }
 void drawPNG(pRenderNode head, const char *fileName) {
-	CairoHandle *pCH = initDrawContext();
-/*	st_style style;
-    strcpy(style.offsetLeft,    "0px");
-    strcpy(style.offsetTop,     "0px");
-    strcpy(style.width,         "800px");
-    strcpy(style.height,        "600px");
-    strcpy(style.border[0],     "10px");
-    strcpy(style.border[1],     "10px");
-    strcpy(style.border[2],     "10px");
-    strcpy(style.border[3],     "10px");
-    strcpy(style.margin[0],     "10px");
-    strcpy(style.margin[1],     "10px");
-    strcpy(style.margin[2],     "10px");
-    strcpy(style.margin[3],     "10px");
-    strcpy(style.color,         "#00ffff");
-    drawBorder(pCH, style);
-    strcpy(style.offsetLeft,    "50px");
-    strcpy(style.offsetTop,     "50px");
-    strcpy(style.color,         "#0c0");
-    drawBorder(pCH, style);
-    strcpy(style.offsetLeft,    "30px");
-    strcpy(style.offsetTop,     "30px");
-    strcpy(style.color,         "#cf0");
-    drawBorder(pCH, style);
-
-// test draw text
-    strcpy(style.offsetLeft,    "500px");
-    strcpy(style.offsetTop,     "300px");
-    strcpy((style).font_style,    "normal");
-    strcpy((style).font_weight,   "normal");
-    strcpy((style).text_align,    "left");
-    strcpy((style).line_break,    "normal");
-    strcpy((style).font_size,    "20px");
-    strcpy(style.color,         "#c00");
-
-    drawText(pCH, "To beautiful you", style);
-    strcpy(style.offsetLeft,    "150px");
-    strcpy(style.offsetTop,     "150px");
-    strcpy((style).font_style,    "italic");
-    strcpy((style).font_weight,   "bold");
-*/    
-
+	CairoHandle *pCH = initDrawContext();  
     drawANode(head->domNode->sonNodes[0], pCH);
     writeDrawFile(pCH, fileName);
     printf("draw a png\n");

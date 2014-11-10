@@ -3,8 +3,8 @@ body.box{
 	offsetTop: 0px;
 	display: block;
 	position: static;
-	width: 614px;
-	height: 614px;
+	width: 798px;
+	height: 394px;
 	padding: 0 0 0 0;
 	border: 1px 1px 1px 1px;
 	margin: 8px 8px 8px 8px;
@@ -23,12 +23,12 @@ body.box{
 
 body.box>p#div1.box1.box2[0]{
 	offsetLeft: 9px;
-	offsetTop: 111px;
+	offsetTop: 35px;
 	display: block;
 	position: absolute;
-	width: 102px;
-	height: 102px;
-	padding:    0;
+	width: 210px;
+	height: 100px;
+	padding: 0 0 0 0;
 	border: 1px 1px 1px 1px;
 	margin:    x;
 	left: 0;
@@ -46,14 +46,14 @@ body.box>p#div1.box1.box2[0]{
 
 body.box>div#jin[1]{
 	offsetLeft: 9px;
-	offsetTop: 215px;
+	offsetTop: 137px;
 	display: block;
 	position: static;
-	width: auto;
-	height: auto;
-	padding: 0 0 0 0;
-	border:    xpx;
-	margin:    x;
+	width: 134px;
+	height: 32px;
+	padding: 0 0 0 0px;
+	border:  0px  0px;
+	margin:  0px  0px;
 	left: auto;
 	right: auto;
 	top: auto;
@@ -69,14 +69,14 @@ body.box>div#jin[1]{
 
 body.box>div#jin[1]>p[0]{
 	offsetLeft: 9px;
-	offsetTop: 215px;
+	offsetTop: 137px;
 	display: block;
 	position: static;
-	width: auto;
-	height: auto;
-	padding: 0 0 0 0;
+	width: 132px;
+	height: 28px;
+	padding: 0 0 0 0px;
 	border: 1px 1px 1px 1px;
-	margin: 1em 0 1em 0;
+	margin: 1em 0px 1em 0px;
 	left: auto;
 	right: auto;
 	top: auto;
@@ -92,7 +92,7 @@ body.box>div#jin[1]>p[0]{
 
 body.box>div#jin[1]>p[0]>span[0]{
 	offsetLeft: 10px;
-	offsetTop: 217px;
+	offsetTop: 139px;
 	display: inline;
 	position: static;
 	width: auto;
@@ -115,7 +115,7 @@ body.box>div#jin[1]>p[0]>span[0]{
 
 body.box>em[2]{
 	offsetLeft: 9px;
-	offsetTop: 315px;
+	offsetTop: 169px;
 	display: inline;
 	position: static;
 	width: auto;
@@ -138,11 +138,11 @@ body.box>em[2]{
 
 body.box>strong.box[3]{
 	offsetLeft: 9px;
-	offsetTop: 417px;
+	offsetTop: 171px;
 	display: inline;
 	position: static;
 	width: auto;
-	height: 102px;
+	height: auto;
 	padding: 0 0 0 0;
 	border: 1px 1px 1px 1px;
 	margin: 0 0 0 0;
@@ -161,11 +161,11 @@ body.box>strong.box[3]{
 
 body.box>strong.box[3]>em.test[0]{
 	offsetLeft: 10px;
-	offsetTop: 418px;
+	offsetTop: 172px;
 	display: hehhehe;
 	position: static;
-	width: auto;
-	height: auto;
+	width: 794px;
+	height: 150px;
 	padding: 0 0 0 0;
 	border: 1px 1px 1px 1px;
 	margin: 0 0 0 0;
@@ -184,14 +184,14 @@ body.box>strong.box[3]>em.test[0]{
 
 body.box>h[4]{
 	offsetLeft: 9px;
-	offsetTop: 519px;
+	offsetTop: 173px;
 	display: block;
 	position: static;
-	width: auto;
-	height: auto;
-	padding: 0 0 0 0;
+	width: 450px;
+	height: 50px;
+	padding: 0 0 0 0px;
 	border: 1px 1px 1px 1px;
-	margin: 0.67em 0 0.67em 0;
+	margin: 0.67em 0px 0.67em 0px;
 	left: auto;
 	right: auto;
 	top: auto;

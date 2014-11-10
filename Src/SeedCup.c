@@ -34,23 +34,23 @@ int main(int argc, char const *argv[]) {
         free(cssTemp);
         free(cssurl);
         // 开始解析html和css文件
-        RenderNode *renderHead = generateRenderTree(data, css);
+        RenderNode *renderHead = generateRenderTree(data, css, head->dir);
         // 可能因为文件太大而不能处理
         if (renderHead != NULL) {
-            printDOMTree(renderHead->domNode);
-            char *webText = getWebText(renderHead);
+            // printDOMTree(renderHead->domNode);
             // 得到文件名
             char fileName[100];
             sprintf(fileName, "%s.txt", head->dir);
             FILE *f = fopen(fileName, "w");
             char *h = (char *)malloc(200 * sizeof(char));
+            // 写入文件
             print2File(renderHead->domNode, f, &h);
             free(h);
             fclose(f);
+            // 画图
             sprintf(fileName, "%s.png", head->dir);
             drawPNG(renderHead, fileName);
             
-            free(webText);
             freeRenderTree(renderHead);
         }
         free(data);

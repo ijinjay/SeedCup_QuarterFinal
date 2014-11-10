@@ -32,9 +32,9 @@ static Color str2Color(const char *str) {
 
 extern int px2int(const char *px) {
 	int pixel = (int)strtol(px, NULL, 10);
-	// printf("pixel is %d\n", pixel);
+	//printf("pixel is %d\n", pixel);
 	if (strcmp(px, "auto") == 0)
-		return 100;
+		return 0;
 	return pixel;
 }
 extern int em2int(const char *em, int fontsize) {
@@ -111,7 +111,7 @@ void drawText(pCairoHandle pCH, const char *text, st_style style) {
 			font_weight = CAIRO_FONT_WEIGHT_BOLD;
 		cairo_select_font_face(pCH->cr, "arial", font_italic, font_weight);
 		cairo_set_font_size(pCH->cr, px2int(style.font_size));
-		cairo_move_to(pCH->cr, px2int(style.offsetLeft), px2int(style.offsetTop));
+		cairo_move_to(pCH->cr, px2int(style.offsetLeft), px2int(style.offsetTop) + px2int(style.height));
 		cairo_show_text(pCH->cr, text);
 	}
 

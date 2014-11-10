@@ -203,7 +203,10 @@ static cssNode *ruleParser(selectNode *snode, ruleList* rules) {
         int valueLen = strlen(currentRule->value);
         for(int i = valueLen - 1; i >= 0; i--) {
             if(isspace(currentRule->value[i]))
+            {
                 currentRule->value[i] = '\0';
+                printf("currentRule->value:%s",currentRule->value);
+            }
             else
                 break;
         }
@@ -278,9 +281,9 @@ static int handleRule(cssNode* c, rule* r, int i) {
                 int len = strlen(r->value);
                 int t = 0;
                 int pos = 0;
-                while(t<len)
+                while(t<=len)
                 {
-                    if(isspace(r->value[t]))
+                    if(isspace(r->value[t])||(r->value[t] == '\0'))
                     {
                         c->padding[count][pos] = '\0';
                         count++;
@@ -289,6 +292,7 @@ static int handleRule(cssNode* c, rule* r, int i) {
                     else
                     {
                         c->padding[count][pos] = r->value[t];
+                        pos++;
                     }
                     t++;
                 }
